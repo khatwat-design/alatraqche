@@ -1,0 +1,36 @@
+{
+  "name": "mafroushat-al-atrqji",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@10",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "dev:standalone": "NEXT_PUBLIC_STORE_STANDALONE=true next dev",
+    "build": "next build",
+    "build:standalone": "NEXT_PUBLIC_STORE_STANDALONE=true next build",
+    "start": "STORE_API_BASE_URL=http://127.0.0.1:8080/api/v1 node server.js",
+    "start:standalone": "STORE_API_BASE_URL=http://127.0.0.1:8080/api/v1 NEXT_PUBLIC_STORE_STANDALONE=true node server.js",
+    "deploy:hostinger": "node scripts/deploy-hostinger.js",
+    "build:hostinger": "node scripts/hostinger-build.js",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "next": "16.1.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

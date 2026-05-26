@@ -1,0 +1,23 @@
+# Dashboard (Laravel)
+/dashboard/vendor/
+/dashboard/node_modules/
+/dashboard/storage/
+/dashboard/public/build/
+/dashboard/.env
+/dashboard/.env.*
+
+# Storefront (Next.js)
+/storefront/node_modules/
+/storefront/.next/
+/storefront/.env.local
+/storefront/.env
+/storefront/out/
+
+# Product images — stored on server/CDN, not in git
+/dashboard/public/products/
+/storefront/public/products/
+/storefront/public/images/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+:root {
+  /* ألوان متناغمة مع شعار ذهبي على أسود */
+  --background: #fafaf9;
+  --foreground: #0c0a09;
+  --color-primary: #b8860b;
+  --color-primary-600: #9a7209;
+  --color-accent: #d4af37;
+  --color-surface: #ffffff;
+  --color-muted: #57534e;
+  --color-border: #e7e5e4;
+  --shadow-soft: 0 24px 60px -40px rgba(184, 134, 11, 0.28);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-cairo);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: #ffffff;
+  color: #000000;
+  font-family: var(--font-cairo), Arial, Helvetica, sans-serif;
+  direction: rtl;
+}
+
+* {
+  box-sizing: border-box;
+}

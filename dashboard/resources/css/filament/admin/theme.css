@@ -1,0 +1,14 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+/* Loading bar برتقالي */
+[wire\:loading] + div,
+.fi-spa-loading-bar {
+    background-color: #f97316 !important;
+}
+
+/* حركة pulse للوجو أثناء التحميل */
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .7; transform: scale(.95); }
+}
+

@@ -1,0 +1,236 @@
+[
+  {
+    "id": "k9-crystal-vase",
+    "name": "فازة كريستال K9",
+    "description": "فازة زجاجية فنية بتدرج ألوان (أزرق، أخضر، كهرماني)، حافة مموجة وقاعدة شفافة — قطعة ديكور أنيقة للمنزل أو المكتب.",
+    "price": 17000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/k9-crystal-vase.png"
+  },
+  {
+    "id": "crystal-vase-gradient",
+    "name": "فازة كريستال",
+    "description": "فازة زجاجية بشكل بيضاوي بتدرج لوني من أزرق في الأعلى إلى كهرماني ذهبي في الأسفل — قطعة ديكور عصرية للمنزل.",
+    "price": 20000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-vase-amber-teal.png"
+  },
+  {
+    "id": "k9-crystal-vase-swirl",
+    "name": "فازة كريستال K9",
+    "description": "فازة زجاجية طويلة بتدرج كهرماني وأخضر مزرق مع شريط زجاجي ملتف وحافة مموجة — قاعدة كريستال شفافة ثابتة.",
+    "price": 28000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/k9-crystal-vase-swirl.png"
+  },
+  {
+    "id": "crystal-vase-bottle-blue",
+    "name": "فازة كريستال",
+    "description": "فازة زجاجية بشكل زجاجة بعنق طويل، لونان أزرقان (فاتح في الأعلى وأعمق في الأسفل) — أنيقة للطاولات والرفوف.",
+    "price": 20000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-vase-bottle-blue.png"
+  },
+  {
+    "id": "crystal-vase-carved",
+    "name": "فازة كريستال منحوت",
+    "description": "فازة زجاجية بيضاوية بلونين (كهرماني وأزرق مزرق) مع حلقات أفقية منحوتة بتموجات بارزة — قاعدة كريستال شفافة.",
+    "price": 19000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-vase-carved.png"
+  },
+  {
+    "id": "crystal-vase-set-2",
+    "name": "سيت فازة عدد 2",
+    "description": "طقم فازتين زجاجيتين بتدرج أزرق في الأعلى وكهرماني في الأسفل — واحدة طويلة وواحدة كروية، مناسبة للديكور أو الهدية.",
+    "price": 35000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-vase-set-2.png"
+  },
+  {
+    "id": "crystal-vase-sphere-teal",
+    "name": "فازة كريستال",
+    "description": "فازة كريستال كروية بلون أخضر مزرق بسطح منقوش بنقاط بارزة، عنق وقاعدة داكنة — قطعة ديكور مميزة.",
+    "price": 19000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-vase-sphere-teal.png"
+  },
+  {
+    "id": "crystal-vase-bubble-gold-neck",
+    "name": "فازة كريستال",
+    "description": "فازة أسطوانية بلون أزرق بارد بسطح فقاعي بارز، عنق ذهبي لامع وقاعدة داكنة — تصميم فاخر للديكور.",
+    "price": 20000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-vase-bubble-gold-neck.png"
+  },
+  {
+    "id": "vase-round-bunny",
+    "name": "فازة مكورة",
+    "description": "قطعة زجاجية ديكورية بشكل بيضاوي أبيض شفاف مع فقاعات داخلية وأذنان زجاجيتان ورديتان — تصميم أرنب فني.",
+    "price": 14000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/vase-round-bunny.png"
+  },
+  {
+    "id": "crystal-fish-colored",
+    "name": "سمكة كريستال ملونة",
+    "description": "تمثال سمكة زجاجي شفاف بنقاط خضراء ومزرقة في الجسم، زعانف بلون كهرماني وعينان بارزتان — قطعة ديكور زينة.",
+    "price": 10000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-fish-colored.png"
+  },
+  {
+    "id": "crystal-tree-leaf",
+    "name": "ورقة الشجرة كريستالية",
+    "description": "تمثال ورقة شجر زجاجي بلون أخضر زمردي وأزرق مع لمسات ذهبية، ساق كهرمانية وقاعدة كريستال مربعة — قطعة فنية للديكور.",
+    "price": 15000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-tree-leaf.png"
+  },
+  {
+    "id": "crystal-rooster",
+    "name": "كريستال شكل دجاج",
+    "description": "تمثال دجاجة زجاجية بجسم بني مرقط وعرف وذيل أحمر لامع — قطعة ديكور زينة فاخرة.",
+    "price": 14000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-rooster.png"
+  },
+  {
+    "id": "vase-heavyweight",
+    "name": "فازة وزن ثقيل",
+    "description": "فازة زجاجية سميكة بجسم كروي، تموجات برتقالية وخضراء داخلية مع فقاعات، حافة مزدوجة بارزة وقاعدة كريستال شفافة — قطعة صلبة وفاخرة.",
+    "price": 15000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/vase-heavyweight.png"
+  },
+  {
+    "id": "pottery-elephant-set",
+    "name": "سيت الفيل فخاري",
+    "description": "طقم 6 قطع: 4 فيلة فخارية رمادية ماتة متشابكة واثنتان صغيرتان بيضاء لامعة — ديكور عصري للرفوف والطاولات.",
+    "price": 25000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/pottery-elephant-set.png"
+  },
+  {
+    "id": "crystal-fish-transparent",
+    "name": "سمكة الشفافة",
+    "description": "تمثال سمكة زجاج شفاف بتموج أزرق كوبالتي ولمسات ذهبية داخلية، زعانف شفافة مضلعة — قطعة ديكور أنيقة.",
+    "price": 10000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-fish-transparent.png"
+  },
+  {
+    "id": "glass-apple",
+    "name": "تفاحة زجاجية",
+    "description": "تفاحة زجاجية بيضاء بنقاط ذهبية بنية وعنق شفاف — قطعة ديكور لامعة للطاولات والرفوف.",
+    "price": 12000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/glass-apple.png"
+  },
+  {
+    "id": "crystal-vase-30cm",
+    "name": "فازة كريستال ارتفاع 30 سم",
+    "description": "فازة كريستال طويلة بسطح مجعد عضوي، كهرماني في الأسفل يتلاشى إلى شفاف في الأعلى — ارتفاع 30 سم تقريباً.",
+    "price": 20000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/crystal-vase-30cm.png"
+  },
+  {
+    "id": "chrome-candle-holder",
+    "name": "شمعدان كروم",
+    "description": "حامل شموع معدني بلمسة كروم ذهبية لامعة، إطار هندسي مع كأس زجاجي مقطّع في الأسفل وزينة كروية في الأعلى.",
+    "price": 10000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/chrome-candle-holder.png"
+  },
+  {
+    "id": "candle-holder-dana",
+    "name": "شمعه دان",
+    "description": "حامل شموع بقاعدة كروم ذهبية، كأس خشبي وقفص معدني مع مدخنة زجاجية مدخنة — تصميم عصري للديكور.",
+    "price": 10000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/candle-holder-dana.png"
+  },
+  {
+    "id": "candle-dana-chrome",
+    "name": "شمعة دان كروم",
+    "description": "حامل شموع كروم ذهبي بقاعدة سوداء وذهبية، خلفية ورقة مخرمة وزجاج أسطواني شفاف للشمعة.",
+    "price": 15000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/candle-dana-chrome.png"
+  },
+  {
+    "id": "candle-dana-chrome-oval",
+    "name": "شمعة دان كروم",
+    "description": "حامل شموع كروم بخلفية ورقة بيضاوية منحوتة بلون برونزي ذهبي، كأس زجاجي كهرماني وقاعدة سوداء وذهبية.",
+    "price": 15000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/candle-dana-chrome-oval.png"
+  },
+  {
+    "id": "candle-dana-chrome-lacy",
+    "name": "شمعة دان كروم",
+    "description": "حامل شموع كروم ذهبي بخلفية ورقة مخرمة بتصميم عضوي، كأس زجاجي شفاف وقاعدة سوداء دائرية.",
+    "price": 13000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/candle-dana-chrome-lacy.png"
+  },
+  {
+    "id": "candle-dana-chrome-luxury-base",
+    "name": "شمعة دان كروم وأرضية فخامة",
+    "description": "حامل شموع كروم بخلفية شكل لهب بإطار ذهبي وتعبئة برونزية لامعة، كأس زجاجي وقاعدة سوداء مربعة فاخرة.",
+    "price": 15000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/candle-dana-chrome-luxury-base.png"
+  },
+  {
+    "id": "candle-dana-chrome-leaf",
+    "name": "شمعة دان كروم",
+    "description": "حامل شموع كروم ذهبي بخلفية ورقة استوائية مخرمة، كأس زجاجي شفاف وقاعدة سوداء دائرية متدرجة.",
+    "price": 12000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/candle-dana-chrome-leaf.png"
+  },
+  {
+    "id": "candle-dana-chrome-plastic-base",
+    "name": "شمعة دان كروم وأرضية بلاستك",
+    "description": "حامل شموع كروم بخلفية ورقة ذهبية بتعبئة برونزية لامعة، كأس زجاجي وقاعدة بلاستيك سوداء مستطيلة.",
+    "price": 14000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/candle-dana-chrome-plastic-base.png"
+  },
+  {
+    "id": "candle-dana-feather",
+    "name": "شمعه دان",
+    "description": "حامل شموع ذهبي بخلفية ورقة ريشية مخرمة بشرائح أفقية، كأس زجاجي وقاعدة سوداء دائرية مع طبقة ذهبية.",
+    "price": 14000,
+    "category": "ديكور منزلي",
+    "categoryId": "home-decor",
+    "image": "/products/candle-dana-feather.png"
+  }
+]
