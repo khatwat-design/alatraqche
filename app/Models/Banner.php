@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Models;
+
+use App\Helpers\AssetHelper;
+use App\Traits\BroadcastsStoreChange;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+
+class Banner extends Model implements HasMedia
+{
+    /** @use HasFactory<\Database\Factories\BannerFactory> */
+    use HasFactory, InteractsWithMedia, BroadcastsStoreChange;
+
+    protected static function storeChangeType(): string { return 'banners'; }
+
+    protected $fillable = [
+        'title',
+        'image',
+        'link_url',
+        'sort_order',
+        'is_active',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'sort_order' => 'integer',
+            'is_active' => 'boolean',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => cache()->forget('storefront.banners'));
+        static::deleted(fn () => cache()->forget('storefront.banners'));
+    }
+
+    public function registerMediaCollections(?Media $media = null): void
+    {
+        $this->addMediaCollection('default')
+            ->singleFile()
+            ->registerMediaConversions(function (Media $media) {
+                $this->addMediaConversion('thumb')
+                    ->width(400)
+                    ->height(200);
+                $this->addMediaConversion('large')
+                    ->width(1920)
+                    ->height(800);
+            });
+    }
+
+    public static function clearCache(): void
+    {
+        cache()->forget('storefront.banners');
+    }
+
+    public function getImagePublicUrlAttribute(): string
+    {
+        $media = $this->getFirstMedia('default');
+        if ($media) {
+            $conversions = $media->getGeneratedConversions();
+            if ($conversions['large'] ?? false) {
+                return $media->getUrl('large');
+            }
+            return $media->getUrl();
+        }
+        if ($this->image) {
+            return AssetHelper::publicUrl($this->image) ?? '';
+        }
+        return '';
+    }
+}

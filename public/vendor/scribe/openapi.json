@@ -1,0 +1,537 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "الأطرقجي - API",
+    "description": "واجهة برمجة التطبيقات لمتجر الأطرقجي للسجاد والأثاث والمفروشات. تدعم التصفح وعرض المنتجات، إدارة الحسابات، وإنشاء الطلبات.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "الأطرقجي",
+      "url": "https://alatraqji.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost/api/v1",
+      "description": "Local development"
+    }
+  ],
+  "paths": {
+    "/store": {
+      "get": {
+        "summary": "بيانات المتجر",
+        "description": "إعدادات المتجر الكاملة: الاسم، الشعار، الألوان، العنوان، روابط التواصل، أكواد التسويق",
+        "tags": ["المتجر"],
+        "responses": {
+          "200": {
+            "description": "بيانات المتجر",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "storeName": { "type": "string" },
+                    "sloganLine1": { "type": "string" },
+                    "sloganLine2": { "type": "string" },
+                    "primaryColor": { "type": "string" },
+                    "logoUrl": { "type": "string", "nullable": true },
+                    "phones": { "type": "array", "items": { "type": "string" } },
+                    "instagramUrl": { "type": "string", "nullable": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "summary": "التصنيفات",
+        "description": "قائمة التصنيفات مرتبة حسب الترتيب",
+        "tags": ["المتجر"],
+        "responses": {
+          "200": {
+            "description": "قائمة التصنيفات",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "description": { "type": "string", "nullable": true },
+                      "image": { "type": "string", "nullable": true }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "summary": "المنتجات",
+        "description": "قائمة المنتجات المرئية مع إمكانية البحث والتصفية حسب التصنيف",
+        "tags": ["المتجر"],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "بحث في الاسم والوصف"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "تصفية حسب معرف التصنيف"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 50 },
+            "description": "عدد المنتجات في الصفحة"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "قائمة المنتجات مع بيانات التصفح",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string" },
+                          "description": { "type": "string" },
+                          "price": { "type": "integer" },
+                          "badge": { "type": "string", "nullable": true },
+                          "category": { "type": "string" },
+                          "categoryId": { "type": "string" },
+                          "image": { "type": "string" }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": { "type": "integer" },
+                        "last_page": { "type": "integer" },
+                        "per_page": { "type": "integer" },
+                        "total": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "summary": "منتج واحد",
+        "description": "عرض منتج واحد حسب المعرف",
+        "tags": ["المتجر"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "المنتج",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "product": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "name": { "type": "string" },
+                        "price": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "غير موجود" }
+        }
+      }
+    },
+    "/banners": {
+      "get": {
+        "summary": "البانرات",
+        "description": "قائمة البانرات النشطة مرتبة حسب الترتيب",
+        "tags": ["المتجر"],
+        "responses": {
+          "200": {
+            "description": "قائمة البانرات",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "title": { "type": "string", "nullable": true },
+                      "image": { "type": "string" },
+                      "linkUrl": { "type": "string", "nullable": true }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "تسجيل حساب جديد",
+        "description": "إنشاء حساب عميل جديد مع تطبيع رقم الهاتف العراقي",
+        "tags": ["المصادقة"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "phone", "password", "password_confirmation"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "phone": { "type": "string", "description": "رقم الهاتف (يدعم +964, 00964, 07xx)" },
+                  "password": { "type": "string", "minLength": 8 },
+                  "password_confirmation": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "تم التسجيل بنجاح",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "token": { "type": "string" },
+                    "tokenType": { "type": "string" },
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "name": { "type": "string" },
+                        "phone": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": { "description": "خطأ في التحقق (هاتف مسجل أو صحة البيانات)" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "تسجيل الدخول",
+        "description": "تسجيل دخول العميل باستخدام رقم الهاتف وكلمة المرور",
+        "tags": ["المصادقة"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["phone", "password"],
+                "properties": {
+                  "phone": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "تم الدخول بنجاح",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "token": { "type": "string" },
+                    "tokenType": { "type": "string" },
+                    "customer": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "بيانات الدخول غير صحيحة" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "تسجيل الخروج",
+        "description": "إلغاء التوكن الحالي",
+        "tags": ["المصادقة"],
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "تم الخروج",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "الملف الشخصي",
+        "description": "بيانات العميل المسجل حالياً",
+        "tags": ["المصادقة"],
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "بيانات العميل",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "customer": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "name": { "type": "string" },
+                        "phone": { "type": "string" },
+                        "email": { "type": "string", "nullable": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "summary": "إنشاء طلب",
+        "description": "إنشاء طلب جديد مع خصم المخزون. يُنشئ حساب عميل تلقائياً إذا لم يكن موجوداً ويعيد توكن.",
+        "tags": ["الطلبات"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["customer", "items", "summary"],
+                "properties": {
+                  "customer": {
+                    "type": "object",
+                    "required": ["name", "phone"],
+                    "properties": {
+                      "name": { "type": "string" },
+                      "phone": { "type": "string" },
+                      "city": { "type": "string" },
+                      "address": { "type": "string" }
+                    }
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["id", "name", "price", "quantity", "subtotal"],
+                      "properties": {
+                        "id": { "type": "string" },
+                        "name": { "type": "string" },
+                        "price": { "type": "integer" },
+                        "quantity": { "type": "integer" },
+                        "subtotal": { "type": "integer" }
+                      }
+                    }
+                  },
+                  "summary": {
+                    "type": "object",
+                    "required": ["subtotal", "total", "totalItems"],
+                    "properties": {
+                      "subtotal": { "type": "integer" },
+                      "deliveryFee": { "type": "integer" },
+                      "total": { "type": "integer" },
+                      "totalItems": { "type": "integer" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "تم إنشاء الطلب",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "invoiceId": { "type": "string" },
+                    "orderId": { "type": "integer" },
+                    "storeToken": { "type": "string", "nullable": true },
+                    "tokenType": { "type": "string", "nullable": true }
+                  }
+                }
+              }
+            }
+          },
+          "422": { "description": "خطأ (مخزون غير كافٍ، منتج غير موجود، إلخ)" }
+        }
+      }
+    },
+    "/my/orders": {
+      "get": {
+        "summary": "طلباتي",
+        "description": "قائمة طلبات العميل المسجل (مرتبة تنازلياً)",
+        "tags": ["الطلبات"],
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "قائمة الطلبات مع التصفح",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer" },
+                          "invoiceId": { "type": "string" },
+                          "status": { "type": "string" },
+                          "statusLabel": { "type": "string" },
+                          "total": { "type": "integer" },
+                          "totalItems": { "type": "integer" },
+                          "createdAt": { "type": "string", "format": "date-time" }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": { "type": "integer" },
+                        "last_page": { "type": "integer" },
+                        "per_page": { "type": "integer" },
+                        "total": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/my/orders/{invoiceId}": {
+      "get": {
+        "summary": "تفاصيل الطلب",
+        "description": "عرض طلب واحد مع المنتجات",
+        "tags": ["الطلبات"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "invoiceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "تفاصيل الطلب",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "order": {
+                      "type": "object",
+                      "properties": {
+                        "invoiceId": { "type": "string" },
+                        "status": { "type": "string" },
+                        "statusLabel": { "type": "string" },
+                        "total": { "type": "integer" },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": { "type": "string" },
+                              "quantity": { "type": "integer" },
+                              "unitPrice": { "type": "integer" },
+                              "subtotal": { "type": "integer" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "الطلب غير موجود أو لا يخص الحساب" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Sanctum"
+      }
+    }
+  }
+}
