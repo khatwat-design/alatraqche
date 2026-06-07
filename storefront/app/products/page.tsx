@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import { getCategories, getProducts } from "@/lib/api";
+import type { FilterState } from "@/types";
 import { ProductsGrid } from "@/components/store/ProductsGrid";
 import { FiltersPanel } from "@/components/store/FiltersPanel";
 import { SortSelect } from "@/components/store/SortSelect";
@@ -17,11 +18,12 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
 export default async function ProductsPage({ searchParams }: PageProps) {
   const params = await searchParams;
+  const sortParam = (params.sort as FilterState["sort"]) || "default";
   const [categories, productsData] = await Promise.all([
     getCategories(),
     getProducts({
       category: params.category,
-      sort: params.sort || "default",
+      sort: sortParam,
       search: params.search,
       page: params.page ? Number(params.page) : 1,
     }),
