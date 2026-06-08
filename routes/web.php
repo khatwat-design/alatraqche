@@ -19,6 +19,10 @@ Route::get('/health', function () {
     ]);
 });
 
+Route::get('/login', function () {
+    return redirect('/admin/login');
+})->name('login');
+
 Route::prefix('admin/reports/download')->middleware([
     \Illuminate\Cookie\Middleware\EncryptCookies::class,
     \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
