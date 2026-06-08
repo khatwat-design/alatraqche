@@ -56,7 +56,7 @@ export default function Sidebar({ open, onClose }: { open: boolean; onClose: () 
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-100 px-5">
           <Link href="/" className="flex items-center gap-2.5" onClick={onClose}>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl gold-gradient shadow-sm">
-              <Image src="/logo.png" alt="الأطرقجي" width={22} height={22} className="h-5 w-5 object-contain brightness-0 invert" />
+              <Image src="/logo.png" alt="الأطرقجي" width={22} height={22} unoptimized className="h-5 w-5 object-contain brightness-0 invert" />
             </div>
             <span className="text-base font-bold">
               <span className="text-gray-900">الأ</span>

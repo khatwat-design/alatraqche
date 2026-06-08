@@ -108,6 +108,7 @@ export function Navbar({ categories }: NavbarProps) {
                 alt="الأطرقجي"
                 width={36}
                 height={36}
+                unoptimized
                 className="h-9 w-9 object-contain"
               />
               <div>

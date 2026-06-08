@@ -148,7 +148,7 @@ export default function DashboardPage() {
             <p className="text-sm font-bold gold-text">{formatPrice(avgOrder)}</p>
           </div>
           <div className="flex items-center gap-2 rounded-xl border border-accent/20 bg-accent-subtle px-4 py-2">
-            <Image src="/logo.png" alt="الأطرقجي" width={24} height={24} className="h-6 w-6 object-contain" />
+            <Image src="/logo.png" alt="الأطرقجي" width={24} height={24} unoptimized className="h-6 w-6 object-contain" />
             <span className="text-sm font-semibold gold-text">الأطرقجي</span>
           </div>
         </div>
