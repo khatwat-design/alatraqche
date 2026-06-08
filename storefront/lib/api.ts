@@ -32,7 +32,7 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
-  const res = await fetch(`${API_BASE}${path}`, { headers, ...options })
+  const res = await fetch(`${API_BASE}${path}`, { headers, cache: 'no-store', ...options })
   if (!res.ok) {
     const body = await res.text()
     let msg: string
