@@ -33,7 +33,6 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
     headers['Authorization'] = `Bearer ${token}`
   }
   const url = `${API_BASE}${path}`
-  console.log('DEBUG apiFetch:', url)
   const res = await fetch(url, { headers, cache: 'no-store', ...options })
   if (!res.ok) {
     const body = await res.text()
@@ -51,11 +50,8 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 
 export async function getCategories(): Promise<Category[]> {
   try {
-    const data = await apiFetch<Category[]>('/categories')
-    console.log('DEBUG getCategories: count', data.length)
-    return data
-  } catch (e) {
-    console.error('DEBUG getCategories error:', e)
+    return await apiFetch<Category[]>('/categories')
+  } catch {
     return []
   }
 }
@@ -69,11 +65,8 @@ export async function getProducts(filters: Partial<FilterState> = {}): Promise<P
   params.set('per_page', '24')
 
   try {
-    const data = await apiFetch<PaginatedProducts>(`/products?${params}`)
-    console.log('DEBUG getProducts: count', data.products?.length, 'total', data.meta?.total)
-    return data
-  } catch (e) {
-    console.error('DEBUG getProducts error:', e)
+    return await apiFetch<PaginatedProducts>(`/products?${params}`)
+  } catch {
     return { products: [], meta: { current_page: 1, last_page: 1, per_page: 24, total: 0 } }
   }
 }
