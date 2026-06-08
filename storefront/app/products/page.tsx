@@ -29,6 +29,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     }),
   ]);
 
+  console.log('DEBUG ProductsPage:', JSON.stringify({ categoriesCount: categories.length, productsCount: productsData.meta.total }));
+
   const activeCategory = params.category ? categories.find((c) => c.id === params.category) : null;
 
   return (
