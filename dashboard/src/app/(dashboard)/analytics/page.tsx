@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TrendingUp, DollarSign, ShoppingCart, Users, Calendar, Clock, Package, CheckCircle, XCircle, Truck } from "lucide-react";
+import {
+  TrendingUp, DollarSign, ShoppingCart, Users,
+  Calendar, Clock, Package, CheckCircle, XCircle, Truck,
+} from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell,
+} from "recharts";
 import api from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 
@@ -21,6 +28,11 @@ const statusMap: Record<string, { label: string; badge: string; color: string }>
   shipped: { label: "تم الشحن", badge: "badge-blue", color: "#3b82f6" },
   delivered: { label: "تم التوصيل", badge: "badge-green", color: "#22c55e" },
   cancelled: { label: "ملغي", badge: "badge-red", color: "#ef4444" },
+};
+
+const statusColors: Record<string, string> = {
+  pending: "#f59e0b", confirmed: "#3b82f6", processing: "#8b5cf6",
+  shipped: "#3b82f6", delivered: "#22c55e", cancelled: "#ef4444",
 };
 
 export default function AnalyticsPage() {
@@ -54,27 +66,32 @@ export default function AnalyticsPage() {
   const totalRevenue = activeOrders.reduce((s, o) => s + o.total, 0);
   const avgOrderValue = activeOrders.length > 0 ? totalRevenue / activeOrders.length : 0;
 
-  // Status distribution
   const statusCounts: Record<string, number> = {};
   orders.forEach((o) => { statusCounts[o.status] = (statusCounts[o.status] || 0) + 1; });
   const statusTotal = orders.length;
 
   // Monthly revenue
   const monthlyData: Record<string, { revenue: number; count: number }> = {};
-  const monthLabels: string[] = [];
   activeOrders.forEach((o) => {
     const d = new Date(o.created_at);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const label = d.toLocaleDateString("ar-IQ", { month: "long", year: "numeric" });
-    if (!monthlyData[key]) { monthlyData[key] = { revenue: 0, count: 0 }; monthLabels.push(key); }
+    if (!monthlyData[key]) monthlyData[key] = { revenue: 0, count: 0 };
     monthlyData[key].revenue += o.total;
     monthlyData[key].count += 1;
   });
   const sortedMonths = Object.keys(monthlyData).slice(-6);
-  const maxMonthlyRevenue = Math.max(...sortedMonths.map((m) => monthlyData[m].revenue), 1);
+  const monthlyChartData = sortedMonths.map((key) => {
+    const d = new Date(key + "-01");
+    return {
+      name: d.toLocaleDateString("ar-IQ", { month: "short" }),
+      fullName: d.toLocaleDateString("ar-IQ", { month: "long", year: "numeric" }),
+      revenue: monthlyData[key].revenue,
+      orders: monthlyData[key].count,
+    };
+  });
 
   // Daily orders (last 7 days)
-  const days: { label: string; count: number }[] = [];
+  const days: { label: string; count: number; full: string }[] = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
@@ -84,52 +101,31 @@ export default function AnalyticsPage() {
       const od = new Date(o.created_at);
       return od >= dayStart && od < dayEnd;
     }).length;
-    days.push({
-      label: d.toLocaleDateString("ar-IQ", { weekday: "short" }),
-      count,
-    });
+    const weekday = d.toLocaleDateString("ar-IQ", { weekday: "short" });
+    const full = d.toLocaleDateString("ar-IQ", { weekday: "long", day: "numeric", month: "short" });
+    days.push({ label: weekday, count, full });
   }
-  const maxDayCount = Math.max(...days.map((d) => d.count), 1);
+
+  // Pie data
+  const pieData = Object.entries(statusCounts)
+    .filter(([, count]) => count > 0)
+    .map(([key, count]) => ({
+      name: statusMap[key]?.label || key,
+      value: count,
+      color: statusColors[key] || "#737373",
+    }));
 
   const metrics = [
-    {
-      label: "إجمالي الإيرادات",
-      value: formatPrice(totalRevenue),
-      sub: formatPrice(analytics?.total_revenue ?? 0),
-      icon: DollarSign,
-      color: "text-green-600",
-      bg: "bg-green-50",
-    },
-    {
-      label: "متوسط قيمة الطلب",
-      value: formatPrice(avgOrderValue),
-      sub: `${activeOrders.length} طلب نشط`,
-      icon: TrendingUp,
-      color: "text-accent",
-      bg: "bg-accent/10",
-    },
-    {
-      label: "إجمالي الطلبات",
-      value: String(orders.length),
-      sub: `${activeOrders.length} نشط`,
-      icon: ShoppingCart,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
-    },
-    {
-      label: "الزبائن",
-      value: String(analytics?.total_customers ?? 0),
-      sub: "مسجل",
-      icon: Users,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
-    },
+    { label: "إجمالي الإيرادات", value: formatPrice(totalRevenue), sub: formatPrice(analytics?.total_revenue ?? 0), icon: DollarSign, color: "text-green-600", bg: "bg-green-50" },
+    { label: "متوسط قيمة الطلب", value: formatPrice(avgOrderValue), sub: `${activeOrders.length} طلب نشط`, icon: TrendingUp, color: "text-accent", bg: "bg-accent/10" },
+    { label: "إجمالي الطلبات", value: String(orders.length), sub: `${activeOrders.length} نشط`, icon: ShoppingCart, color: "text-blue-600", bg: "bg-blue-50" },
+    { label: "الزبائن", value: String(analytics?.total_customers ?? 0), sub: "مسجل", icon: Users, color: "text-purple-600", bg: "bg-purple-50" },
   ];
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in space-y-6">
       {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
+      <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl gold-gradient shadow-sm">
           <TrendingUp className="h-5 w-5 text-white" />
         </div>
@@ -140,7 +136,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Metric Cards */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map((m) => {
           const Icon = m.icon;
           return (
@@ -160,8 +156,8 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Charts Grid */}
-      <div className="mb-6 grid gap-6 lg:grid-cols-2">
-        {/* Monthly Revenue */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Monthly Revenue - Recharts BarChart */}
         <div className="card">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -170,40 +166,49 @@ export default function AnalyticsPage() {
             </div>
             <Calendar className="h-5 w-5 text-gray-400" />
           </div>
-          {sortedMonths.length === 0 ? (
+          {monthlyChartData.length === 0 ? (
             <div className="py-12 text-center text-sm text-gray-400">لا توجد بيانات</div>
           ) : (
-            <div>
-              <div className="flex items-end justify-between gap-2" style={{ height: 180 }}>
-                {sortedMonths.map((key) => {
-                  const { revenue } = monthlyData[key];
-                  const height = (revenue / maxMonthlyRevenue) * 100;
-                  const d = new Date(key + "-01");
-                  const label = d.toLocaleDateString("ar-IQ", { month: "short" });
-                  return (
-                    <div key={key} className="flex flex-1 flex-col items-center gap-1">
-                      <span className="text-[10px] font-medium text-gray-400">{formatPrice(revenue).split(",")[0]}</span>
-                      <div
-                        className="w-full rounded-t-md transition-all duration-500 hover:opacity-80"
-                        style={{
-                          height: `${Math.max(height, 4)}%`,
-                          background: "linear-gradient(180deg, #D4AF37 0%, #B8960C 100%)",
-                        }}
-                      />
-                      <span className="text-[10px] text-gray-500">{label}</span>
-                    </div>
-                  );
-                })}
+            <>
+              <div dir="ltr" className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyChartData} margin={{ top: 8, right: 8, left: 8, bottom: 4 }}>
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 12, fill: "#9ca3af" }}
+                      axisLine={{ stroke: "#e5e7eb" }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: "#9ca3af" }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
+                    />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", fontSize: 13 }}
+                      formatter={(value) => [formatPrice(Number(value)), "الإيرادات"]}
+                      labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
+                    />
+                    <Bar dataKey="revenue" radius={[6, 6, 0, 0]} maxBarSize={48} fill="url(#goldGradientAnalytics)" />
+                    <defs>
+                      <linearGradient id="goldGradientAnalytics" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#D4AF37" />
+                        <stop offset="100%" stopColor="#B8960C" />
+                      </linearGradient>
+                    </defs>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-400">
                 <span>الإجمالي: {formatPrice(sortedMonths.reduce((s, m) => s + monthlyData[m].revenue, 0))}</span>
                 <span>{sortedMonths.reduce((s, m) => s + monthlyData[m].count, 0)} طلب</span>
               </div>
-            </div>
+            </>
           )}
         </div>
 
-        {/* Daily Orders */}
+        {/* Daily Orders - Recharts BarChart */}
         <div className="card">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -212,62 +217,96 @@ export default function AnalyticsPage() {
             </div>
             <ShoppingCart className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="flex items-end justify-between gap-2" style={{ height: 120 }}>
-            {days.map((d, i) => {
-              const height = (d.count / maxDayCount) * 100;
-              return (
-                <div key={i} className="flex flex-1 flex-col items-center gap-1">
-                  <span className="text-[10px] font-medium text-gray-400">{d.count}</span>
-                  <div
-                    className="w-full rounded-t-md transition-all"
-                    style={{
-                      height: `${Math.max(height, 4)}%`,
-                      backgroundColor: d.count > 0 ? "#D4AF37" : "#e5e5e5",
-                    }}
-                  />
-                  <span className="text-[10px] text-gray-500">{d.label}</span>
-                </div>
-              );
-            })}
+          <div dir="ltr" className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={days} margin={{ top: 8, right: 8, left: 8, bottom: 4 }}>
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 12, fill: "#9ca3af" }}
+                  axisLine={{ stroke: "#e5e7eb" }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", fontSize: 13 }}
+                  formatter={(value) => [Number(value), "طلب"]}
+                  labelFormatter={(label, payload) => payload?.[0]?.payload?.full || label}
+                />
+                <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={48} fill="url(#goldGradientDaily)" />
+                <defs>
+                  <linearGradient id="goldGradientDaily" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#D4AF37" />
+                    <stop offset="100%" stopColor="#B8960C" />
+                  </linearGradient>
+                </defs>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      {/* Status Distribution */}
+      {/* Status Distribution + Summary */}
       <div className="grid gap-6 lg:grid-cols-2">
+        {/* Status Distribution - Recharts PieChart */}
         <div className="card">
           <div className="mb-4 flex items-center gap-2">
             <Package className="h-5 w-5 text-accent" />
             <h2 className="text-lg font-semibold text-gray-900">توزيع حالات الطلبات</h2>
           </div>
-          {statusTotal === 0 ? (
+          {pieData.length === 0 ? (
             <div className="py-8 text-center text-sm text-gray-400">لا توجد طلبات</div>
           ) : (
-            <div className="space-y-3">
-              {Object.entries(statusMap).map(([key, { label, color }]) => {
-                const count = statusCounts[key] || 0;
-                const pct = (count / statusTotal) * 100;
-                return (
-                  <div key={key}>
-                    <div className="mb-1 flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="status-dot" style={{ backgroundColor: color }} />
-                        <span className="text-gray-700">{label}</span>
+            <div className="flex flex-wrap items-center gap-6">
+              <div dir="ltr" className="h-48 w-48 shrink-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%" cy="50%"
+                      innerRadius={42}
+                      outerRadius={72}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {pieData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 13 }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex-1 space-y-2.5">
+                {Object.entries(statusCounts).map(([key, count]) => {
+                  const info = statusMap[key];
+                  if (!info || count === 0) return null;
+                  const pct = ((count / statusTotal) * 100).toFixed(0);
+                  return (
+                    <div key={key}>
+                      <div className="mb-1 flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="status-dot" style={{ backgroundColor: info.color }} />
+                          <span className="text-gray-700">{info.label}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-900">{count}</span>
+                          <span className="w-10 text-left text-xs text-gray-400">{pct}%</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-900">{count}</span>
-                        <span className="w-10 text-left text-xs text-gray-400">{pct.toFixed(0)}%</span>
+                      <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                        <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: info.color }} />
                       </div>
                     </div>
-                    <div className="h-2.5 overflow-hidden rounded-full bg-gray-100">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%`, backgroundColor: color }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

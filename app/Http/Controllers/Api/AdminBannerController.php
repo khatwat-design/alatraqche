@@ -40,10 +40,12 @@ class AdminBannerController extends Controller
     {
         $data = $request->validated();
 
+        $maxSort = Banner::max('sort_order') ?? 0;
+
         $banner = new Banner();
         $banner->title = $data['title'];
         $banner->link_url = $data['link_url'] ?? null;
-        $banner->sort_order = (int) ($data['sort_order'] ?? 0);
+        $banner->sort_order = $maxSort + 1;
         $banner->is_active = $data['is_active'] ?? true;
         $banner->image = '';
 

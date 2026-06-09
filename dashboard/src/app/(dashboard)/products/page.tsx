@@ -26,6 +26,7 @@ interface Product {
 interface Category {
   id: number;
   name: string;
+  image?: string;
   is_enabled: boolean;
   products_count?: number;
 }
@@ -91,8 +92,9 @@ export default function ProductsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [categoryForm, setCategoryForm] = useState({ name: "", description: "" });
+  const [categoryForm, setCategoryForm] = useState<{ name: string; description: string; image: File | null }>({ name: "", description: "", image: null });
   const [savingCategory, setSavingCategory] = useState(false);
+  const categoryFileRef = useRef<HTMLInputElement>(null);
 
   const fetchProducts = useCallback(() => {
     setLoading(true);
@@ -183,10 +185,16 @@ export default function ProductsPage() {
     }
     setSavingCategory(true);
     try {
-      await api.post("/admin/categories", categoryForm);
+      const fd = new FormData();
+      fd.append("name", categoryForm.name);
+      if (categoryForm.description) fd.append("description", categoryForm.description);
+      if (categoryForm.image) fd.append("image", categoryForm.image);
+      await api.post("/admin/categories", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       toast.success("تم إنشاء التصنيف بنجاح");
       setShowCategoryModal(false);
-      setCategoryForm({ name: "", description: "" });
+      setCategoryForm({ name: "", description: "", image: null });
       fetchCategories();
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.response?.data?.errors?.[Object.keys(err?.response?.data?.errors || {})[0]]?.[0] || "فشل إنشاء التصنيف";
@@ -283,7 +291,7 @@ export default function ProductsPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => { setShowCategoryModal(true); setCategoryForm({ name: "", description: "" }); }} className="btn-secondary text-sm">
+          <button onClick={() => { setShowCategoryModal(true); setCategoryForm({ name: "", description: "", image: null }); }} className="btn-secondary text-sm">
             <Tag className="h-4 w-4" />
             تصنيفات
           </button>
@@ -490,7 +498,7 @@ export default function ProductsPage() {
                   <div>
                     <div className="mb-1.5 flex items-center justify-between">
                       <label className="block text-sm font-medium text-gray-700">التصنيف</label>
-                      <button type="button" onClick={() => { setShowCategoryModal(true); setCategoryForm({ name: "", description: "" }); }}
+                      <button type="button" onClick={() => { setShowCategoryModal(true); setCategoryForm({ name: "", description: "", image: null }); }}
                         className="flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover">
                         <Plus className="h-3 w-3" /> إضافة تصنيف جديد
                       </button>
@@ -589,14 +597,39 @@ export default function ProductsPage() {
 
       {/* ── Category Modal ───────────────────────────────────── */}
       {showCategoryModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" onClick={() => setShowCategoryModal(false)}>
-          <div className="w-full max-w-md animate-fade-in rounded-2xl border border-gray-200 bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/40 p-4 pt-12" onClick={() => setShowCategoryModal(false)}>
+          <div className="w-full max-w-lg animate-fade-in rounded-2xl border border-gray-200 bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-              <h2 className="text-lg font-semibold text-gray-900">إضافة تصنيف جديد</h2>
+              <h2 className="text-lg font-semibold text-gray-900">إدارة التصنيفات</h2>
               <button onClick={() => setShowCategoryModal(false)} className="btn-ghost p-1 text-gray-400">
                 <X className="h-5 w-5" />
               </button>
             </div>
+
+            {/* Existing categories */}
+            {categories.length > 0 && (
+              <div className="border-b border-gray-50 px-6 py-4">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">التصنيفات الحالية</p>
+                <div className="space-y-2">
+                  {categories.map((cat) => (
+                    <div key={cat.id} className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent/10 text-sm font-bold text-accent">
+                        {cat.image ? (
+                          <img src={cat.image} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          cat.name.charAt(0)
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-gray-900">{cat.name}</p>
+                        <p className="text-xs text-gray-400">{cat.products_count ?? 0} منتج</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-4 p-6">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">اسم التصنيف *</label>
@@ -609,6 +642,36 @@ export default function ProductsPage() {
                 <textarea value={categoryForm.description}
                   onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
                   className="input-field min-h-[80px] resize-y" placeholder="وصف التصنيف..." />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">صورة التصنيف (اختياري)</label>
+                <div
+                  onClick={() => categoryFileRef.current?.click()}
+                  className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 p-6 text-center transition-colors hover:border-accent hover:bg-accent-subtle"
+                >
+                  <Upload className="mb-2 h-8 w-8 text-gray-300" />
+                  <p className="text-sm font-medium text-gray-500">انقر لرفع صورة</p>
+                  <p className="mt-1 text-xs text-gray-400">PNG, JPG, WebP — حتى 2MB</p>
+                  <input ref={categoryFileRef} type="file" className="hidden" accept="image/jpeg,image/png,image/jpg,image/webp"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setCategoryForm({ ...categoryForm, image: file });
+                      e.target.value = "";
+                    }} />
+                </div>
+                {categoryForm.image && (
+                  <div className="mt-3 flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                    <img src={URL.createObjectURL(categoryForm.image)} alt="" className="h-12 w-12 rounded-lg object-cover" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-gray-900">{categoryForm.image.name}</p>
+                      <p className="text-xs text-gray-400">{(categoryForm.image.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                    <button onClick={() => setCategoryForm({ ...categoryForm, image: null })}
+                      className="btn-ghost p-1 text-gray-400 hover:text-red-500">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex items-center justify-between border-t border-gray-100 px-6 py-4">

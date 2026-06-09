@@ -74,31 +74,6 @@ export function Navbar({ categories }: NavbarProps) {
             : "bg-white"
         }`}
       >
-        {/* Top bar */}
-        <div className="hidden border-b border-gray-100 bg-dark-950 md:block">
-          <div className="mx-auto flex h-9 max-w-7xl items-center justify-between px-4 sm:px-6">
-            <span className="text-[11px] text-gray-400">🛒 التوصيل لجميع محافظات العراق — الدفع عند الاستلام</span>
-            <div className="flex items-center gap-4">
-              <a
-                href={waLink1}
-                className="flex items-center gap-1.5 text-[11px] text-gray-400 transition-colors hover:text-brand-400"
-              >
-                <Phone size={10} />
-                {phone1}
-              </a>
-              {phone2 && (
-                <a
-                  href={waLink2}
-                  className="flex items-center gap-1.5 text-[11px] text-gray-400 transition-colors hover:text-brand-400"
-                >
-                  <Phone size={10} />
-                  {phone2}
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-
         {/* Main nav */}
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between gap-4">

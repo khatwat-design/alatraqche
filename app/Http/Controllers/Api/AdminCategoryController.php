@@ -9,6 +9,7 @@ use App\Http\Resources\CategoryCollection;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 
 class AdminCategoryController extends Controller
 {
@@ -44,6 +45,13 @@ class AdminCategoryController extends Controller
             'sort_order' => (int) ($data['sort_order'] ?? ((int) Category::max('sort_order')) + 1),
         ]);
 
+        if ($request->hasFile('image')) {
+            $category->image = $request->file('image')->store('categories', 'public');
+            $category->save();
+        }
+
+        $category->load('media');
+
         return response()->json([
             'ok' => true,
             'message' => 'تم إنشاء التصنيف بنجاح',
@@ -71,7 +79,16 @@ class AdminCategoryController extends Controller
             $category->sort_order = (int) $data['sort_order'];
         }
 
+        if ($request->hasFile('image')) {
+            if ($category->image) {
+                Storage::disk('public')->delete($category->image);
+            }
+            $category->image = $request->file('image')->store('categories', 'public');
+        }
+
         $category->save();
+
+        $category->load('media');
 
         return response()->json([
             'ok' => true,

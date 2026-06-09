@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Image, X, Check, Search } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Plus, Pencil, Trash2, Image, X, Check, Search, Upload, Star } from "lucide-react";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -19,12 +19,12 @@ interface Banner {
 interface BannerForm {
   title: string;
   link_url: string;
-  sort_order: number;
   is_active: boolean;
-  image?: string;
+  imageFile?: File | null;
+  imagePreview?: string;
 }
 
-const emptyForm: BannerForm = { title: "", link_url: "", sort_order: 0, is_active: true };
+const emptyForm: BannerForm = { title: "", link_url: "", is_active: true, imageFile: null, imagePreview: undefined };
 
 export default function BannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -36,6 +36,7 @@ export default function BannersPage() {
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchBanners = () => {
     setLoading(true);
@@ -58,11 +59,26 @@ export default function BannersPage() {
     setForm({
       title: banner.title,
       link_url: banner.link_url || "",
-      sort_order: banner.sort_order,
       is_active: banner.is_active,
-      image: banner.image,
+      imageFile: null,
+      imagePreview: banner.image,
     });
     setModalOpen(true);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("حجم الصورة يجب أن لا يتجاوز 2 ميجابايت");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setForm({ ...form, imageFile: file, imagePreview: reader.result as string });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
   const handleSave = async () => {
@@ -72,12 +88,22 @@ export default function BannersPage() {
     }
     setSaving(true);
     try {
-      const payload = { ...form };
+      const fd = new FormData();
+      fd.append("title", form.title);
+      if (form.link_url) fd.append("link_url", form.link_url);
+      fd.append("is_active", form.is_active ? "1" : "0");
+      if (form.imageFile) fd.append("image", form.imageFile);
+
       if (editing) {
-        await api.put(`/admin/banners/${editing.id}`, payload);
+        fd.append("_method", "PUT");
+        await api.post(`/admin/banners/${editing.id}`, fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         toast.success("تم تحديث البانر بنجاح");
       } else {
-        await api.post("/admin/banners", payload);
+        await api.post("/admin/banners", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         toast.success("تم إنشاء البانر بنجاح");
       }
       setModalOpen(false);
@@ -118,9 +144,9 @@ export default function BannersPage() {
   );
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in space-y-6">
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl gold-gradient shadow-sm">
             <Image className="h-5 w-5 text-white" />
@@ -137,17 +163,15 @@ export default function BannersPage() {
       </div>
 
       {/* Search */}
-      <div className="mb-6">
-        <div className="relative max-w-sm">
-          <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="بحث عن بانر..."
-            className="input-field pr-9"
-          />
-        </div>
+      <div className="relative max-w-sm">
+        <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="بحث عن بانر..."
+          className="input-field pr-9"
+        />
       </div>
 
       {/* Table */}
@@ -255,28 +279,48 @@ export default function BannersPage() {
               </button>
             </div>
             <div className="space-y-5 p-6">
-              {/* Image preview */}
-              {form.image && (
-                <div className="flex justify-center">
-                  <div className="flex h-32 w-full items-center justify-center overflow-hidden rounded-xl bg-gray-100">
-                    <img
-                      src={form.image}
-                      alt="Preview"
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                </div>
-              )}
+              {/* Image upload */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">رابط الصورة</label>
-                <input
-                  type="text"
-                  value={form.image || ""}
-                  onChange={(e) => setForm({ ...form, image: e.target.value })}
-                  placeholder="https://example.com/image.jpg"
-                  className="input-field"
-                />
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">صورة البانر</label>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 p-6 text-center transition-colors hover:border-accent hover:bg-accent-subtle"
+                >
+                  {form.imagePreview ? (
+                    <div className="relative w-full">
+                      <img
+                        src={form.imagePreview}
+                        alt="Preview"
+                        className="mx-auto max-h-40 rounded-lg object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setForm({ ...form, imageFile: null, imagePreview: editing?.image });
+                        }}
+                        className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-sm hover:bg-red-600"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="mb-2 h-10 w-10 text-gray-300" />
+                      <p className="text-sm font-medium text-gray-500">انقر لرفع صورة</p>
+                      <p className="mt-1 text-xs text-gray-400">JPG, PNG, WebP — حتى 2MB</p>
+                    </>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/jpeg,image/png,image/jpg,image/webp"
+                    onChange={handleImageSelect}
+                  />
+                </div>
               </div>
+
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">العنوان</label>
                 <input
@@ -297,25 +341,16 @@ export default function BannersPage() {
                   className="input-field"
                 />
               </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">ترتيب العرض</label>
-                <input
-                  type="number"
-                  value={form.sort_order}
-                  onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })}
-                  className="input-field"
-                />
-              </div>
               <div className="flex items-center gap-3">
-                <label className="text-sm font-medium text-gray-700">نشط</label>
-                <div className="relative inline-flex cursor-pointer items-center">
-                  <input
-                    type="checkbox"
-                    checked={form.is_active}
-                    onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                    className="h-5 w-5 cursor-pointer rounded border-gray-300 text-accent accent-accent"
+                <div
+                  className={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${form.is_active ? "bg-green-500" : "bg-gray-300"}`}
+                  onClick={() => setForm({ ...form, is_active: !form.is_active })}
+                >
+                  <div
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${form.is_active ? "translate-x-[22px]" : "translate-x-0.5"}`}
                   />
                 </div>
+                <span className="text-sm font-medium text-gray-700">نشط</span>
               </div>
             </div>
             <div className="flex justify-end gap-3 border-t border-gray-100 px-6 py-4">

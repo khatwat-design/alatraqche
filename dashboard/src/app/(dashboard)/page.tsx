@@ -14,7 +14,21 @@ import {
   Clock,
   ChevronLeft,
   BarChart3,
+  Plus,
+  Settings,
+  ExternalLink,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import api from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 
@@ -42,6 +56,22 @@ const statusMap: Record<string, { label: string; badge: string }> = {
   delivered: { label: "تم التوصيل", badge: "badge-green" },
   cancelled: { label: "ملغي", badge: "badge-red" },
 };
+
+const statusColors: Record<string, string> = {
+  pending: "#f59e0b",
+  confirmed: "#3b82f6",
+  processing: "#8b5cf6",
+  shipped: "#3b82f6",
+  delivered: "#22c55e",
+  cancelled: "#ef4444",
+};
+
+const shortcuts = [
+  { label: "إضافة منتج", href: "/products", icon: Plus },
+  { label: "عرض الطلبات", href: "/orders", icon: ShoppingCart },
+  { label: "التحليلات", href: "/analytics", icon: TrendingUp },
+  { label: "الإعدادات", href: "/settings", icon: Settings },
+];
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -71,37 +101,38 @@ export default function DashboardPage() {
   }
 
   const recentOrders = allOrders.slice(0, 5);
-  const totalRevenue = allOrders
-    .filter((o) => o.status !== "cancelled")
-    .reduce((s, o) => s + o.total, 0);
-  const avgOrder = allOrders.filter((o) => o.status !== "cancelled").length > 0
-    ? totalRevenue / allOrders.filter((o) => o.status !== "cancelled").length
-    : 0;
+  const activeOrders = allOrders.filter((o) => o.status !== "cancelled");
+  const totalRevenue = activeOrders.reduce((s, o) => s + o.total, 0);
+  const avgOrder = activeOrders.length > 0 ? totalRevenue / activeOrders.length : 0;
 
-  // Status distribution
   const statusCounts: Record<string, number> = {};
   allOrders.forEach((o) => { statusCounts[o.status] = (statusCounts[o.status] || 0) + 1; });
   const statusTotal = Object.values(statusCounts).reduce((s, c) => s + c, 0);
-  const statusColors: Record<string, string> = {
-    pending: "#f59e0b",
-    confirmed: "#3b82f6",
-    processing: "#8b5cf6",
-    shipped: "#3b82f6",
-    delivered: "#22c55e",
-    cancelled: "#ef4444",
-  };
 
-  // Monthly revenue from orders
   const monthlyRevenue: Record<string, number> = {};
-  allOrders
-    .filter((o) => o.status !== "cancelled")
-    .forEach((o) => {
-      const month = new Date(o.created_at).toLocaleString("ar-IQ", { month: "short" });
-      monthlyRevenue[month] = (monthlyRevenue[month] || 0) + o.total;
-    });
-  const monthNames = Object.keys(monthlyRevenue).slice(-6);
-  const monthValues = Object.values(monthlyRevenue).slice(-6);
-  const maxRevenue = Math.max(...monthValues, 1);
+  activeOrders.forEach((o) => {
+    const d = new Date(o.created_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const label = d.toLocaleDateString("ar-IQ", { month: "short" });
+    monthlyRevenue[key] = (monthlyRevenue[key] || 0) + o.total;
+  });
+  const sortedMonths = Object.keys(monthlyRevenue).slice(-6);
+  const chartData = sortedMonths.map((key) => {
+    const d = new Date(key + "-01");
+    return {
+      name: d.toLocaleDateString("ar-IQ", { month: "short" }),
+      revenue: monthlyRevenue[key],
+      fullName: d.toLocaleDateString("ar-IQ", { month: "long", year: "numeric" }),
+    };
+  });
+
+  const pieData = Object.entries(statusCounts)
+    .filter(([, count]) => count > 0)
+    .map(([key, count]) => ({
+      name: statusMap[key]?.label || key,
+      value: count,
+      color: statusColors[key] || "#737373",
+    }));
 
   const statCards = [
     {
@@ -134,35 +165,42 @@ export default function DashboardPage() {
     },
   ];
 
+  const formatCurrency = (value: number) => formatPrice(value);
+
   return (
-    <div className="animate-fade-in">
-      {/* Header */}
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+    <div className="animate-fade-in space-y-6">
+      {/* Header + Shortcuts */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">لوحة التحكم</h1>
           <p className="mt-1 text-sm text-gray-500">نظرة عامة على أداء المتجر</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">متوسط الطلب</p>
-            <p className="text-sm font-bold gold-text">{formatPrice(avgOrder)}</p>
-          </div>
-          <div className="flex items-center gap-2 rounded-xl border border-accent/20 bg-accent-subtle px-4 py-2">
-            <Image src="/logo.png" alt="الأطرقجي" width={24} height={24} unoptimized className="h-6 w-6 object-contain" />
-            <span className="text-sm font-semibold gold-text">الأطرقجي</span>
-          </div>
+        <div className="flex items-center gap-2">
+          {shortcuts.map((s) => {
+            const Icon = s.icon;
+            return (
+              <Link
+                key={s.label}
+                href={s.href}
+                className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm transition-all hover:border-accent/30 hover:text-accent hover:shadow-md"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{s.label}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
       {/* Stat Cards */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => {
           const Icon = card.icon;
           const change = card.prev > 0 ? ((card.value - card.prev) / card.prev) * 100 : 0;
           const isPositive = change >= 0;
 
           return (
-            <div key={card.label} className="stat-card group flex flex-col">
+            <div key={card.label} className="stat-card group relative overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5">
               <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-accent via-accent-hover to-accent opacity-60" />
               <div className="mb-1 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -192,9 +230,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts Row */}
-      <div className="mb-6 grid gap-6 lg:grid-cols-2">
-        {/* Monthly Revenue Chart */}
-        <div className="card">
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Monthly Revenue - Recharts BarChart */}
+        <div className="card lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-accent" />
@@ -204,77 +242,116 @@ export default function DashboardPage() {
               تفاصيل <ChevronLeft className="h-4 w-4" />
             </Link>
           </div>
-          {monthNames.length === 0 ? (
-            <div className="py-8 text-center">
-              <BarChart3 className="mx-auto mb-2 h-8 w-8 text-gray-300" />
-              <p className="text-sm text-gray-400">لا توجد بيانات كافية</p>
+          {chartData.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <BarChart3 className="mb-2 h-10 w-10 text-gray-300" />
+              <p className="text-sm text-gray-400">لا توجد بيانات إيرادات كافية</p>
             </div>
           ) : (
-            <div className="flex items-end justify-between gap-2" style={{ height: 160 }}>
-              {monthNames.map((name, i) => {
-                const height = (monthValues[i] / maxRevenue) * 100;
-                return (
-                  <div key={i} className="flex flex-1 flex-col items-center gap-1">
-                    <span className="text-[10px] font-medium text-gray-400">{formatPrice(monthValues[i]).split(".")[0]}</span>
-                    <div
-                      className="w-full rounded-t-md transition-all duration-500 hover:opacity-80"
-                      style={{
-                        height: `${Math.max(height, 4)}%`,
-                        background: "linear-gradient(180deg, #D4AF37 0%, #B8960C 100%)",
-                      }}
-                    />
-                    <span className="text-[10px] text-gray-500">{name}</span>
-                  </div>
-                );
-              })}
+            <div dir="ltr" className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 4 }}>
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12, fill: "#9ca3af" }}
+                    axisLine={{ stroke: "#e5e7eb" }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#9ca3af" }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid #e5e7eb",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      fontSize: 13,
+                    }}
+                    formatter={(value) => [formatPrice(Number(value)), "الإيرادات"]}
+                    labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
+                  />
+                  <Bar
+                    dataKey="revenue"
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={48}
+                    fill="url(#goldGradient)"
+                  />
+                  <defs>
+                    <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#D4AF37" />
+                      <stop offset="100%" stopColor="#B8960C" />
+                    </linearGradient>
+                  </defs>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           )}
         </div>
 
-        {/* Status Distribution */}
+        {/* Status Distribution - Recharts PieChart */}
         <div className="card">
           <div className="mb-4 flex items-center gap-2">
             <Package className="h-5 w-5 text-accent" />
-            <h2 className="text-lg font-semibold text-gray-900">توزيع حالات الطلبات</h2>
+            <h2 className="text-lg font-semibold text-gray-900">حالات الطلبات</h2>
           </div>
-          {statusTotal === 0 ? (
-            <div className="py-8 text-center">
-              <ShoppingCart className="mx-auto mb-2 h-8 w-8 text-gray-300" />
+          {pieData.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <ShoppingCart className="mb-2 h-10 w-10 text-gray-300" />
               <p className="text-sm text-gray-400">لا توجد طلبات</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {Object.entries(statusMap).map(([key, { label }]) => {
-                const count = statusCounts[key] || 0;
-                const pct = statusTotal > 0 ? (count / statusTotal) * 100 : 0;
-                return (
-                  <div key={key}>
-                    <div className="mb-1 flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="status-dot" style={{ backgroundColor: statusColors[key] || "#737373" }} />
-                        <span className="text-gray-700">{label}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-900">{count}</span>
-                        <span className="text-xs text-gray-400">{pct.toFixed(0)}%</span>
-                      </div>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%`, backgroundColor: statusColors[key] || "#737373" }}
+            <>
+              <div dir="ltr" className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {pieData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: "1px solid #e5e7eb",
+                        fontSize: 13,
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-2 space-y-1.5">
+                {pieData.map((item) => (
+                  <div key={item.name} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: item.color }}
                       />
+                      <span className="text-gray-600">{item.name}</span>
                     </div>
+                    <span className="font-semibold text-gray-900">{item.value}</span>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
 
-      {/* Recent Orders */}
+      {/* Bottom Section */}
       <div className="grid gap-6 lg:grid-cols-2">
+        {/* Recent Orders */}
         <div className="card">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -286,8 +363,8 @@ export default function DashboardPage() {
             </Link>
           </div>
           {recentOrders.length === 0 ? (
-            <div className="py-8 text-center">
-              <ShoppingCart className="mx-auto mb-2 h-8 w-8 text-gray-300" />
+            <div className="flex flex-col items-center justify-center py-8">
+              <ShoppingCart className="mb-2 h-8 w-8 text-gray-300" />
               <p className="text-sm text-gray-400">لا توجد طلبات حديثة</p>
             </div>
           ) : (
@@ -314,47 +391,64 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Summary Cards */}
+        {/* Summary + Quick Stats */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="card-static flex flex-col items-center justify-center text-center">
+          <div className="card-static flex flex-col items-center justify-center text-center transition-all hover:shadow-md hover:-translate-y-0.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
               <ShoppingCart className="h-5 w-5 text-green-600" />
             </div>
             <p className="mt-3 text-2xl font-bold text-gray-900">{allOrders.length}</p>
             <p className="text-xs text-gray-500">إجمالي الطلبات</p>
           </div>
-          <div className="card-static flex flex-col items-center justify-center text-center">
+          <div className="card-static flex flex-col items-center justify-center text-center transition-all hover:shadow-md hover:-translate-y-0.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50">
-              <XIcon className="h-5 w-5 text-red-600" />
+              <svg className="h-5 w-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
             </div>
             <p className="mt-3 text-2xl font-bold text-gray-900">{statusCounts["cancelled"] || 0}</p>
             <p className="text-xs text-gray-500">طلبات ملغية</p>
           </div>
-          <div className="card-static flex flex-col items-center justify-center text-center">
+          <div className="card-static flex flex-col items-center justify-center text-center transition-all hover:shadow-md hover:-translate-y-0.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
               <TrendingUp className="h-5 w-5 text-blue-600" />
             </div>
-            <p className="mt-3 text-2xl font-bold text-gray-900">{allOrders.filter((o) => o.status === "delivered").length}</p>
-            <p className="text-xs text-gray-500">طلبات مكتملة</p>
+            <p className="mt-3 text-2xl font-bold text-gray-900">{activeOrders.length}</p>
+            <p className="text-xs text-gray-500">طلبات نشطة</p>
           </div>
-          <div className="card-static flex flex-col items-center justify-center text-center">
+          <div className="card-static flex flex-col items-center justify-center text-center transition-all hover:shadow-md hover:-translate-y-0.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50">
-              <Clock className="h-5 w-5 text-purple-600" />
+              <DollarSign className="h-5 w-5 text-purple-600" />
             </div>
-            <p className="mt-3 text-2xl font-bold text-gray-900">{statusCounts["pending"] || 0}</p>
-            <p className="text-xs text-gray-500">قيد الانتظار</p>
+            <p className="mt-3 text-lg font-bold text-gray-900">{formatPrice(avgOrder)}</p>
+            <p className="text-xs text-gray-500">متوسط الطلب</p>
+          </div>
+
+          {/* Quick Access Card */}
+          <div className="card-static col-span-2 flex flex-col justify-center transition-all hover:shadow-md">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">وصول سريع</p>
+            <div className="grid grid-cols-2 gap-2">
+              <Link href="/products" className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-accent/20 hover:bg-accent/5 hover:text-accent">
+                <Package className="h-4 w-4" />
+                المنتجات
+              </Link>
+              <Link href="/orders" className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-accent/20 hover:bg-accent/5 hover:text-accent">
+                <ShoppingCart className="h-4 w-4" />
+                الطلبات
+              </Link>
+              <Link href="/customers" className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-accent/20 hover:bg-accent/5 hover:text-accent">
+                <Users className="h-4 w-4" />
+                العملاء
+              </Link>
+              <Link href="/analytics" className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-accent/20 hover:bg-accent/5 hover:text-accent">
+                <BarChart3 className="h-4 w-4" />
+                التحليلات
+              </Link>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function XIcon(props: React.ComponentProps<"svg">) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
   );
 }

@@ -10,7 +10,6 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class AdminProductController extends Controller
 {
@@ -77,15 +76,12 @@ class AdminProductController extends Controller
         $primaryIdx = (int) ($request->input('primary_image', 0));
 
         foreach ($images as $i => $file) {
-            $path = $file->store('products', 'public');
-            $url = Storage::url($path);
-
-            $product->addMedia(storage_path('app/public/' . $path))
+            $media = $product->addMedia($file)
                 ->withCustomProperties(['is_primary' => $i === $primaryIdx])
-                ->toMediaCollection('gallery');
+                ->toMediaCollection('default');
 
             if ($i === $primaryIdx || ($i === 0 && ! $request->has('primary_image'))) {
-                $product->image = $url;
+                $product->image = $media->getUrl();
             }
         }
 

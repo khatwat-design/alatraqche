@@ -58,8 +58,12 @@ export default async function HomePage() {
                 href={`/products?category=${cat.id}`}
                 className="flex shrink-0 flex-col items-center gap-2 rounded-2xl bg-white px-6 py-4 shadow-sm transition-shadow hover:shadow-md"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-brand-50 text-lg font-bold text-brand-600">
-                  {cat.name.charAt(0)}
+                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-brand-50 text-lg font-bold text-brand-600">
+                  {cat.image ? (
+                    <img src={cat.image} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    cat.name.charAt(0)
+                  )}
                 </div>
                 <span className="whitespace-nowrap text-sm font-medium text-dark-900">{cat.name}</span>
               </Link>
@@ -84,23 +88,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      <section className="bg-dark-950 py-16 text-center text-white">
-        <div className="mx-auto max-w-2xl px-4">
-          <h2 className="text-2xl font-bold md:text-3xl">
-            {store?.sloganLine1 || "الأطرقجي"}
-          </h2>
-          <p className="mt-3 text-gray-400">
-            {store?.sloganLine2 || "مكان يحتاجه كل بيت، نوفر كل أنواع السجاد والمفروشات والأثاث"}
-          </p>
-          <Link
-            href="/products"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-500 px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-600"
-          >
-            تسوق الآن
-            <ShoppingBag size={18} />
-          </Link>
-        </div>
-      </section>
+
     </>
   );
 }
