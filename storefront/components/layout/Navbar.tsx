@@ -79,7 +79,7 @@ export function Navbar({ categories }: NavbarProps) {
           <div className="flex h-16 items-center justify-between gap-4">
             <Link href="/" className="flex shrink-0 items-center gap-2.5">
               <Image
-                src="/logo.png"
+                src="/store/logo.png"
                 alt="الأطرقجي"
                 width={36}
                 height={36}

@@ -32,6 +32,99 @@
   }
 }
 
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, var(--color-brand-500), var(--color-brand-600));
+  padding: 0.7rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: white;
+  transition: all 0.15s;
+  cursor: pointer;
+  &:hover {
+    background: linear-gradient(135deg, var(--color-brand-600), var(--color-brand-700));
+    box-shadow: 0 4px 12px rgba(212, 160, 23, 0.3);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@utility btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-gray-200);
+  background: white;
+  padding: 0.7rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-dark-700);
+  transition: all 0.15s;
+  cursor: pointer;
+  &:hover {
+    background: var(--color-brand-50);
+    border-color: var(--color-brand-300);
+    color: var(--color-brand-700);
+  }
+}
+
+@utility btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  background: #ef4444;
+  padding: 0.7rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: white;
+  transition: all 0.15s;
+  cursor: pointer;
+  &:hover {
+    background: #dc2626;
+  }
+}
+
+@utility card {
+  border-radius: 1rem;
+  border: 1px solid var(--color-gray-100);
+  background: white;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s;
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+}
+
+@utility input-field {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-gray-200);
+  background: white;
+  padding: 0.7rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-dark-900);
+  outline: none;
+  transition: all 0.15s;
+  &:focus {
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.12);
+  }
+  &::placeholder {
+    color: var(--color-gray-400);
+  }
+}
+
 @utility badge-gold {
   background: linear-gradient(135deg, #d4a017, #b8860b);
   color: white;

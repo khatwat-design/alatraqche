@@ -48,13 +48,13 @@ class AdminBannerController extends Controller
         $banner->sort_order = $maxSort + 1;
         $banner->is_active = $data['is_active'] ?? true;
         $banner->image = '';
+        $banner->save();
 
         if ($request->hasFile('image')) {
             $banner->addMediaFromRequest('image')
                 ->toMediaCollection('default');
+            $banner->load('media');
         }
-
-        $banner->save();
 
         return response()->json([
             'ok' => true,

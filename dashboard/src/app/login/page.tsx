@@ -54,7 +54,7 @@ export default function LoginPage() {
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl gold-gradient p-0.5 shadow-lg shadow-accent/20">
             <div className="flex h-full w-full items-center justify-center rounded-2xl bg-gray-950">
-              <Image src="/logo.png" alt="الأطرقجي" width={44} height={44} unoptimized className="h-11 w-11 object-contain" />
+              <Image src="/admin/logo.png" alt="الأطرقجي" width={44} height={44} unoptimized className="h-11 w-11 object-contain" />
             </div>
           </div>
           <h1 className="text-2xl font-bold text-white">الأطرقجي</h1>
