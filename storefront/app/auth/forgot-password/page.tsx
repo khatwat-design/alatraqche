@@ -57,8 +57,8 @@ export default function ForgotPasswordPage() {
       } else {
         setError(result.message || "حدث خطأ، حاول مرة أخرى.");
       }
-    } catch (err: any) {
-      setError(err.message || "حدث خطأ، حاول مرة أخرى.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "حدث خطأ، حاول مرة أخرى.");
     } finally {
       setLoading(false);
     }
@@ -90,8 +90,8 @@ export default function ForgotPasswordPage() {
       } else {
         setError("رمز التحقق غير صحيح أو منتهي الصلاحية.");
       }
-    } catch (err: any) {
-      setError(err.message || "حدث خطأ، حاول مرة أخرى.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "حدث خطأ، حاول مرة أخرى.");
     } finally {
       setLoading(false);
     }

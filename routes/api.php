@@ -11,10 +11,12 @@ use App\Http\Controllers\Api\AdminOrderController;
 use App\Http\Controllers\Api\AdminProductController;
 use App\Http\Controllers\Api\AdminProductOptionController;
 use App\Http\Controllers\Api\AdminWebhookController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CustomerAuthController;
 use App\Http\Controllers\Api\CustomerOrderController;
 use App\Http\Controllers\Api\CustomerPasswordResetController;
 use App\Http\Controllers\Api\OrderApiController;
+use App\Http\Controllers\Api\OrderOtpController;
 use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\StorefrontController;
 use App\Http\Middleware\Api\ForceJsonResponse;
@@ -32,6 +34,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/notifications/stream', [AdminNotificationController::class, 'stream']);
     Route::post('/orders', [OrderApiController::class, 'store'])->middleware('throttle:20,1');
     Route::get('/coupons/validate/{code}', [OrderApiController::class, 'validateCoupon']);
+
+    Route::post('/auth/request-otp', [AuthController::class, 'requestOtp'])->middleware('throttle:5,1');
+    Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:5,1');
 
     Route::post('/auth/register', [CustomerAuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('/auth/login', [CustomerAuthController::class, 'login'])->middleware('throttle:15,1');
@@ -51,6 +56,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/my/orders', [CustomerOrderController::class, 'index']);
         Route::get('/my/orders/{invoiceId}', [CustomerOrderController::class, 'show'])
             ->where('invoiceId', '[A-Za-z0-9._-]+');
+
+        Route::post('/orders/request-confirmation', [OrderOtpController::class, 'requestConfirmation'])->middleware('throttle:3,1');
+        Route::post('/orders/confirm', [OrderOtpController::class, 'confirm'])->middleware('throttle:5,1');
 
         Route::post('/admin/auth/logout', [AdminAuthController::class, 'logout']);
         Route::get('/admin/auth/me', [AdminAuthController::class, 'me']);

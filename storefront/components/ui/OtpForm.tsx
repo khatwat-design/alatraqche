@@ -4,7 +4,6 @@ import { useState } from "react";
 
 interface OtpFormProps {
   onVerified: (phone: string) => void;
-  apiBase?: string;
 }
 
 function PhoneIcon({ className }: { className?: string }) {
@@ -36,8 +35,7 @@ async function apiPost<T>(path: string, body: unknown): Promise<T> {
   return json as T;
 }
 
-export default function OtpForm({ onVerified, apiBase }: OtpFormProps) {
-  const base = apiBase || API_BASE;
+export default function OtpForm({ onVerified }: OtpFormProps) {
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
