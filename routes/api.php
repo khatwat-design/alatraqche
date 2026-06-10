@@ -4,14 +4,18 @@ use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\AdminBannerController;
 use App\Http\Controllers\Api\AdminCategoryController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminCouponController;
 use App\Http\Controllers\Api\AdminCustomerController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\AdminOrderController;
 use App\Http\Controllers\Api\AdminProductController;
+use App\Http\Controllers\Api\AdminProductOptionController;
+use App\Http\Controllers\Api\AdminWebhookController;
 use App\Http\Controllers\Api\CustomerAuthController;
 use App\Http\Controllers\Api\CustomerOrderController;
 use App\Http\Controllers\Api\CustomerPasswordResetController;
 use App\Http\Controllers\Api\OrderApiController;
+use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\StorefrontController;
 use App\Http\Middleware\Api\ForceJsonResponse;
 use App\Http\Middleware\Api\LogRequests;
@@ -37,9 +41,13 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/forgot-password', [CustomerPasswordResetController::class, 'sendOtp'])->middleware('throttle:5,1');
     Route::post('/auth/reset-password', [CustomerPasswordResetController::class, 'verifyOtp'])->middleware('throttle:10,1');
 
+    Route::post('/otp/send', [OtpController::class, 'send'])->middleware('throttle:5,1');
+    Route::post('/otp/verify', [OtpController::class, 'verify'])->middleware('throttle:10,1');
+
     Route::middleware(['auth:sanctum', ForceJsonResponse::class, LogRequests::class])->group(function () {
         Route::post('/auth/logout', [CustomerAuthController::class, 'logout'])->middleware('throttle:30,1');
         Route::get('/auth/me', [CustomerAuthController::class, 'me']);
+        Route::put('/auth/profile', [CustomerAuthController::class, 'updateProfile']);
         Route::get('/my/orders', [CustomerOrderController::class, 'index']);
         Route::get('/my/orders/{invoiceId}', [CustomerOrderController::class, 'show'])
             ->where('invoiceId', '[A-Za-z0-9._-]+');
@@ -88,6 +96,27 @@ Route::prefix('v1')->group(function () {
             Route::post('/notifications/read-all', [AdminNotificationController::class, 'markAllAsRead']);
 
             Route::put('/admin/auth/profile', [AdminAuthController::class, 'updateProfile']);
+
+            Route::get('/admin/webhooks', [AdminWebhookController::class, 'index']);
+            Route::get('/admin/webhooks/{id}', [AdminWebhookController::class, 'show']);
+            Route::post('/admin/webhooks', [AdminWebhookController::class, 'store']);
+            Route::put('/admin/webhooks/{id}', [AdminWebhookController::class, 'update']);
+            Route::delete('/admin/webhooks/{id}', [AdminWebhookController::class, 'destroy']);
+
+            Route::get('/admin/coupons', [AdminCouponController::class, 'index']);
+            Route::get('/admin/coupons/{id}', [AdminCouponController::class, 'show']);
+            Route::post('/admin/coupons', [AdminCouponController::class, 'store']);
+            Route::put('/admin/coupons/{id}', [AdminCouponController::class, 'update']);
+            Route::delete('/admin/coupons/{id}', [AdminCouponController::class, 'destroy']);
+
+            Route::get('/admin/product-options', [AdminProductOptionController::class, 'index']);
+            Route::get('/admin/product-options/{id}', [AdminProductOptionController::class, 'show']);
+            Route::post('/admin/product-options', [AdminProductOptionController::class, 'store']);
+            Route::put('/admin/product-options/{id}', [AdminProductOptionController::class, 'update']);
+            Route::delete('/admin/product-options/{id}', [AdminProductOptionController::class, 'destroy']);
+            Route::post('/admin/product-options/{optionId}/values', [AdminProductOptionController::class, 'storeValue']);
+            Route::put('/admin/product-options/{optionId}/values/{valueId}', [AdminProductOptionController::class, 'updateValue']);
+            Route::delete('/admin/product-options/{optionId}/values/{valueId}', [AdminProductOptionController::class, 'destroyValue']);
         });
     });
 });

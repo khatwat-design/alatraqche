@@ -95,11 +95,18 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {error && (
-            <div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600">
-              <span className="text-lg">⚠</span> {error}
-            </div>
-          )}
+            {error && (
+              <div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600">
+                <span className="text-lg">⚠</span> {error}
+              </div>
+            )}
+
+            <Link
+              href="/auth/forgot-password"
+              className="block text-center text-sm text-gray-400 underline underline-offset-2 transition-colors hover:text-brand-600"
+            >
+              نسيت كلمة المرور؟
+            </Link>
 
           <button
             type="submit"

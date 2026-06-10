@@ -59,6 +59,7 @@ export function Footer({ categories }: FooterProps) {
               <li><Link href="/" className="text-sm text-gray-400 hover:text-amber-400 transition-colors">الرئيسية</Link></li>
               <li><Link href="/products" className="text-sm text-gray-400 hover:text-amber-400 transition-colors">كل المنتجات</Link></li>
               <li><Link href="/cart" className="text-sm text-gray-400 hover:text-amber-400 transition-colors">سلة التسوق</Link></li>
+              <li><Link href="/my/profile" className="text-sm text-gray-400 hover:text-amber-400 transition-colors">حسابي</Link></li>
               <li><Link href="/auth/login" className="text-sm text-gray-400 hover:text-amber-400 transition-colors">تسجيل الدخول</Link></li>
             </ul>
           </div>

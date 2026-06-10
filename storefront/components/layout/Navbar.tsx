@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingCart, Search, Menu, X, ChevronDown, Phone, User } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, ChevronDown, Phone, User, LogOut, Package } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import type { Category } from "@/types";
@@ -160,13 +160,25 @@ export function Navbar({ categories }: NavbarProps) {
                 <Search size={19} />
               </button>
               {loggedIn ? (
-                <Link
-                  href="/orders"
-                  className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-brand-50 hover:text-brand-600"
-                  aria-label="طلباتي"
-                >
-                  <User size={19} />
-                </Link>
+                <div className="relative group">
+                  <Link
+                    href="/my/profile"
+                    className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-brand-50 hover:text-brand-600"
+                    aria-label="حسابي"
+                  >
+                    <User size={19} />
+                  </Link>
+                  <div className="absolute left-0 top-full mt-1 hidden w-44 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl group-hover:block">
+                    <div className="p-1.5">
+                      <Link href="/my/profile" className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-brand-50 hover:text-brand-600">
+                        <User size={15} /> حسابي
+                      </Link>
+                      <Link href="/orders" className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-brand-50 hover:text-brand-600">
+                        <Package size={15} /> طلباتي
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <Link
                   href="/auth/login"
@@ -244,9 +256,14 @@ export function Navbar({ categories }: NavbarProps) {
               )}
             </Link>
             {loggedIn ? (
-              <Link href="/orders" className="block rounded-lg px-3 py-2.5 text-sm text-gray-700">
-                طلباتي
-              </Link>
+              <>
+                <Link href="/my/profile" className="block rounded-lg px-3 py-2.5 text-sm text-gray-700">
+                  حسابي
+                </Link>
+                <Link href="/orders" className="block rounded-lg px-3 py-2.5 text-sm text-gray-700">
+                  طلباتي
+                </Link>
+              </>
             ) : (
               <Link href="/auth/login" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-brand-600">
                 تسجيل الدخول

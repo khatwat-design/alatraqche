@@ -101,6 +101,36 @@ class CustomerAuthController extends Controller
         ]);
     }
 
+    public function updateProfile(Request $request): JsonResponse
+    {
+        /** @var Customer $customer */
+        $customer = $request->user();
+
+        $data = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'nullable|string|email|max:255|unique:customers,email,' . $customer->id,
+            'password' => 'sometimes|string|min:8|max:255|confirmed',
+        ]);
+
+        if (isset($data['name'])) {
+            $customer->name = $data['name'];
+        }
+        if (array_key_exists('email', $data)) {
+            $customer->email = $data['email'];
+        }
+        if (isset($data['password'])) {
+            $customer->password = $data['password'];
+        }
+
+        $customer->save();
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'تم تحديث الملف الشخصي بنجاح.',
+            'customer' => $this->customerPayload($customer),
+        ]);
+    }
+
     private function customerPayload(Customer $customer): array
     {
         return [

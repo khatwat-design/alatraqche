@@ -26,5 +26,8 @@ declare module 'lucide-react' {
   const Clock: React.FC<LucideProps>
   const User: React.FC<LucideProps>
   const LogOut: React.FC<LucideProps>
-  export { ShoppingCart, Search, Menu, X, ChevronDown, ChevronRight, ChevronLeft, Phone, Heart, SlidersHorizontal, ArrowLeft, Truck, Shield, Star, Trash2, Plus, Minus, ShoppingBag, MapPin, Clock, User, LogOut }
+  const Car: React.FC<LucideProps>
+  const Mail: React.FC<LucideProps>
+  const Package: React.FC<LucideProps>
+  export { ShoppingCart, Search, Menu, X, ChevronDown, ChevronRight, ChevronLeft, Phone, Heart, SlidersHorizontal, ArrowLeft, Truck, Shield, Star, Trash2, Plus, Minus, ShoppingBag, MapPin, Clock, User, LogOut, Car, Mail, Package }
 }

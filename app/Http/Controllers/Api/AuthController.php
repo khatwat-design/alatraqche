@@ -5,36 +5,35 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\PhoneHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
-use App\Services\SmsService;
+use App\Services\TwilioService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
-class CustomerPasswordResetController extends Controller
+class AuthController extends Controller
 {
-    public function sendOtp(Request $request): JsonResponse
+    public function requestOtp(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'phone' => 'required|string|max:32',
+            'phone' => 'required|string|max:20',
         ]);
 
         $phone = PhoneHelper::normalize($data['phone']);
-        $customer = Customer::query()->where('phone', $phone)->first();
 
-        if (! $customer || empty($customer->password)) {
+        if (! str_starts_with($phone, '0') || strlen($phone) < 10) {
             return response()->json([
                 'ok' => false,
-                'message' => 'لا يوجد حساب بهذا الرقم.',
-            ], 404);
+                'message' => 'رقم الهاتف غير صالح. يجب أن يبدأ بـ 077 أو 078 أو 079.',
+            ], 422);
         }
 
-        $sent = SmsService::sendOtp($phone);
+        $e164 = '+964' . substr($phone, 1);
 
-        if ($sent === null) {
+        $sent = TwilioService::sendOtp($e164);
+
+        if (! $sent) {
             return response()->json([
                 'ok' => false,
-                'message' => 'تعذر إرسال رمز التحقق. حاول مرة أخرى.',
+                'message' => 'تعذر إرسال رمز التحقق. حاول مرة أخرى لاحقاً.',
             ], 500);
         }
 
@@ -47,14 +46,22 @@ class CustomerPasswordResetController extends Controller
     public function verifyOtp(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'phone' => 'required|string|max:32',
-            'token' => 'required|string|size:6',
-            'password' => 'required|string|min:8|max:255|confirmed',
+            'phone' => 'required|string|max:20',
+            'code' => 'required|string|size:6',
         ]);
 
         $phone = PhoneHelper::normalize($data['phone']);
 
-        $verified = SmsService::verifyOtp($phone, $data['token']);
+        if (! str_starts_with($phone, '0') || strlen($phone) < 10) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'رقم الهاتف غير صالح.',
+            ], 422);
+        }
+
+        $e164 = '+964' . substr($phone, 1);
+
+        $verified = TwilioService::verifyOtp($e164, $data['code']);
 
         if (! $verified) {
             return response()->json([
@@ -63,16 +70,20 @@ class CustomerPasswordResetController extends Controller
             ], 422);
         }
 
+        $isNew = false;
         $customer = Customer::query()->where('phone', $phone)->first();
-        if (! $customer) {
-            return response()->json([
-                'ok' => false,
-                'message' => 'حساب غير موجود.',
-            ], 404);
-        }
 
-        $customer->password = bcrypt($data['password']);
-        $customer->save();
+        if (! $customer) {
+            $customer = Customer::query()->create([
+                'phone' => $phone,
+                'name' => null,
+                'phone_verified_at' => now(),
+            ]);
+            $isNew = true;
+        } else {
+            $customer->phone_verified_at = now();
+            $customer->save();
+        }
 
         $customer->tokens()->where('name', 'store')->delete();
         $token = $customer->createToken('store')->plainTextToken;
@@ -81,11 +92,12 @@ class CustomerPasswordResetController extends Controller
             'ok' => true,
             'token' => $token,
             'tokenType' => 'Bearer',
-            'customer' => [
+            'user' => [
                 'id' => $customer->id,
-                'name' => $customer->name,
                 'phone' => $customer->phone,
+                'name' => $customer->name,
             ],
+            'is_new_user' => $isNew,
         ]);
     }
 }

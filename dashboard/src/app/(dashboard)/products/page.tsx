@@ -32,8 +32,8 @@ interface Category {
 }
 
 interface StoreSettings {
-  storeName?: string;
-  logoUrl?: string;
+  store_name?: string;
+  logo_url?: string;
 }
 
 function Stepper({ steps, current }: { steps: string[]; current: number }) {
@@ -268,7 +268,7 @@ export default function ProductsPage() {
               <Store className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900">{store.storeName || "المتجر"}</p>
+              <p className="text-sm font-semibold text-gray-900">{store.store_name || "المتجر"}</p>
               <p className="text-xs text-gray-500">
                 <span className="font-medium text-accent">{products.length}</span> منتج •{" "}
                 <span className="font-medium text-green-600">{activeCount}</span> نشط •{" "}
@@ -402,8 +402,7 @@ export default function ProductsPage() {
                         <button onClick={() => setViewProduct(product)} className="btn-ghost p-1.5 text-gray-400 hover:text-accent" title="عرض">
                           <Eye className="h-4 w-4" />
                         </button>
-                        <Link href={`/products/${product.id}/edit`} className="btn-ghost p-1.5 text-gray-400 hover:text-blue-600" title="تعديل"
-                          onClick={(e) => { e.preventDefault(); toast("قيد التطوير", { icon: "🔧" }); }}>
+                        <Link href={`/products/${product.id}/edit`} className="btn-ghost p-1.5 text-gray-400 hover:text-blue-600" title="تعديل">
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <button onClick={() => setDeleteConfirm(product.id)} className="btn-ghost p-1.5 text-gray-400 hover:text-red-600" title="حذف">

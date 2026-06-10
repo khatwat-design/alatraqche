@@ -169,9 +169,16 @@ export async function getMe(): Promise<CustomerInfo | null> {
   }
 }
 
+export async function updateProfile(data: { name?: string; email?: string | null; password?: string; password_confirmation?: string }): Promise<{ ok: boolean; message: string; customer: CustomerInfo }> {
+  return apiFetch('/auth/profile', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
 export async function getMyOrders(page = 1): Promise<{ data: OrderListItem[]; meta: { current_page: number; last_page: number; per_page: number; total: number } } | null> {
   try {
-    return await apiFetch(`/my/orders?page=${page}`)
+    return await apiFetch<{ data: OrderListItem[]; meta: { current_page: number; last_page: number; per_page: number; total: number } }>(`/my/orders?page=${page}`)
   } catch {
     return null
   }
@@ -186,8 +193,36 @@ export async function getMyOrder(invoiceId: string): Promise<OrderDetail | null>
   }
 }
 
+export async function forgotPassword(phone: string) {
+  return apiFetch<{ ok: boolean; message: string }>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ phone }),
+  })
+}
+
+export async function resetPassword(data: { phone: string; otp: string; password: string; password_confirmation: string }) {
+  return apiFetch<{ ok: boolean; token: string; tokenType: string; customer: CustomerInfo }>('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function sendOtp(phone: string) {
+  return apiFetch<{ ok: boolean; message: string }>('/otp/send', {
+    method: 'POST',
+    body: JSON.stringify({ phone }),
+  })
+}
+
+export async function verifyOtp(phone: string, code: string) {
+  return apiFetch<{ ok: boolean; message: string }>('/otp/verify', {
+    method: 'POST',
+    body: JSON.stringify({ phone, code }),
+  })
+}
+
 export async function checkStoreStatus(lastTs = 0): Promise<{ ts: number; type: string }> {
-  return apiFetch(`/store-status?ts=${lastTs}`)
+  return apiFetch<{ ts: number; type: string }>(`/store-status?ts=${lastTs}`)
 }
 
 export const IRAQI_CITIES = [

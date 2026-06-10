@@ -1,8 +1,9 @@
 "use client";
 
-import { Menu, Bell, Search, X, Check, Loader2 } from "lucide-react";
+import { Menu, Bell, Search, X, Check, Loader2, Package, ShoppingCart, Users, Tags, LayoutDashboard, Settings } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 
 interface NotificationItem {
@@ -18,18 +19,52 @@ interface NotificationItem {
   created_at: string;
 }
 
+const searchPages = [
+  { label: "لوحة التحكم", href: "/", icon: "dashboard", keywords: ["رئيسية", "احصائيات", "stats", "home"] },
+  { label: "المنتجات", href: "/products", icon: "products", keywords: ["منتج", "منتجات", "سلعة", "product"] },
+  { label: "الطلبات", href: "/orders", icon: "orders", keywords: ["طلب", "طلبات", "فاتورة", "order", "invoice"] },
+  { label: "العملاء", href: "/customers", icon: "customers", keywords: ["عميل", "عملاء", "زبون", "customer"] },
+  { label: "البنرات", href: "/banners", icon: "banners", keywords: ["بانر", "بنرات", "اعلان", "banner"] },
+  { label: "المتجر", href: "/stores", icon: "stores", keywords: ["متجر", "اعدادات", "store", "settings"] },
+  { label: "الإعدادات", href: "/settings", icon: "settings", keywords: ["اعدادات", "ملف", "profile", "password"] },
+  { label: "تحليلات", href: "/analytics", icon: "analytics", keywords: ["تحليل", "احصائيات", "charts", "analytics"] },
+];
+
+const searchIconMap: Record<string, React.ReactNode> = {
+  dashboard: <LayoutDashboard className="h-4 w-4" />,
+  products: <Package className="h-4 w-4" />,
+  orders: <ShoppingCart className="h-4 w-4" />,
+  customers: <Users className="h-4 w-4" />,
+  banners: <Tags className="h-4 w-4" />,
+  stores: <Settings className="h-4 w-4" />,
+  settings: <Settings className="h-4 w-4" />,
+  analytics: <LayoutDashboard className="h-4 w-4" />,
+};
+
 export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
+  const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{ label: string; href: string; icon: string }[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const sseRef = useRef<EventSource | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+
+  useEffect(() => {
+    if (!searchQuery.trim()) { setSearchResults([]); return; }
+    const q = searchQuery.trim().toLowerCase();
+    const results = searchPages.filter((p) =>
+      p.label.includes(q) || p.keywords.some((k) => k.includes(q))
+    );
+    setSearchResults(results.slice(0, 6));
+  }, [searchQuery]);
 
   const fetchNotifications = useCallback(async () => {
     setLoadingNotifs(true);
@@ -42,7 +77,7 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
     }
   }, []);
 
-  // SSE for real-time notifications
+  // SSE for real-time notifications with fallback polling
   useEffect(() => {
     if (!token) return;
     const url = `${apiBase}/notifications/stream?token=${token}`;
@@ -52,6 +87,7 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
     es.addEventListener("connected", (e: MessageEvent) => {
       const data = JSON.parse(e.data);
       setUnreadCount(data.unread_count ?? 0);
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
     });
 
     es.addEventListener("notifications", (e: MessageEvent) => {
@@ -63,18 +99,43 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
     });
 
     es.addEventListener("error", () => {
-      // fallback polling on SSE error
+      es.close();
+      if (!pollRef.current) {
+        pollRef.current = setInterval(async () => {
+          try {
+            const { data } = await api.get("/notifications");
+            setNotifications(data.notifications?.data ?? data.notifications ?? []);
+            setUnreadCount(data.unread_count ?? 0);
+          } catch {}
+        }, 15000);
+      }
     });
 
     return () => {
       es.close();
       sseRef.current = null;
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
     };
   }, [token, apiBase]);
 
   useEffect(() => {
     if (notifOpen) fetchNotifications();
   }, [notifOpen, fetchNotifications]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+        setSearchQuery("");
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -219,8 +280,9 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
       </header>
 
       {searchOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 pt-[15vh] backdrop-blur-sm">
-          <div className="w-full max-w-lg animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 pt-[15vh] backdrop-blur-sm"
+          onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
+          <div className="w-full max-w-lg animate-fade-in" onClick={(e) => e.stopPropagation()}>
             <div className="mx-4 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
               <div className="relative">
                 <Search className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -240,9 +302,30 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <div className="px-4 py-6 text-center text-sm text-gray-400">
-                اكتب لبدء البحث...
-              </div>
+              {searchResults.length > 0 ? (
+                <div className="p-1.5">
+                  {searchResults.map((r) => (
+                    <button
+                      key={r.href}
+                      onClick={() => { router.push(r.href); setSearchOpen(false); setSearchQuery(""); }}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-right text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                    >
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
+                        {searchIconMap[r.icon] || <Search className="h-4 w-4" />}
+                      </span>
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              ) : searchQuery.trim() ? (
+                <div className="px-4 py-6 text-center text-sm text-gray-400">
+                  لا توجد نتائج لـ &quot;{searchQuery}&quot;
+                </div>
+              ) : (
+                <div className="px-4 py-6 text-center text-sm text-gray-400">
+                  اكتب لبدء البحث...
+                </div>
+              )}
               <div className="border-t border-gray-50 px-4 py-2.5 text-xs text-gray-400">
                 <kbd className="rounded-md border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px]">ESC</kbd>
                 {' '}للإغلاق
