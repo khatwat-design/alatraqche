@@ -33,15 +33,15 @@ Route::prefix('v1')->group(function () {
     Route::get('/events', [\App\Http\Controllers\Api\StoreEventsController::class, 'stream']);
     Route::get('/store-status', [\App\Http\Controllers\Api\StoreEventsController::class, 'status']);
     Route::get('/notifications/stream', [AdminNotificationController::class, 'stream']);
-    Route::post('/orders', [OrderApiController::class, 'store'])->middleware('throttle:20,1');
-    Route::get('/coupons/validate/{code}', [OrderApiController::class, 'validateCoupon']);
+    Route::post('/orders', [OrderApiController::class, 'store'])->middleware([ForceJsonResponse::class, 'throttle:20,1']);
+    Route::get('/coupons/validate/{code}', [OrderApiController::class, 'validateCoupon'])->middleware(ForceJsonResponse::class);
 
-    Route::post('/auth/check-phone', [AuthController::class, 'checkPhone']);
-    Route::post('/auth/request-otp', [AuthController::class, 'requestOtp'])->middleware('throttle:5,1');
-    Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:5,1');
+    Route::post('/auth/check-phone', [AuthController::class, 'checkPhone'])->middleware(ForceJsonResponse::class);
+    Route::post('/auth/request-otp', [AuthController::class, 'requestOtp'])->middleware([ForceJsonResponse::class, 'throttle:5,1']);
+    Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->middleware([ForceJsonResponse::class, 'throttle:5,1']);
 
-    Route::post('/auth/register', [CustomerAuthController::class, 'register'])->middleware('throttle:10,1');
-    Route::post('/auth/login', [CustomerAuthController::class, 'login'])->middleware('throttle:15,1');
+    Route::post('/auth/register', [CustomerAuthController::class, 'register'])->middleware([ForceJsonResponse::class, 'throttle:10,1']);
+    Route::post('/auth/login', [CustomerAuthController::class, 'login'])->middleware([ForceJsonResponse::class, 'throttle:15,1']);
 
     Route::post('/admin/auth/login', [AdminAuthController::class, 'login']);
 
