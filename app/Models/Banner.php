@@ -49,11 +49,13 @@ class Banner extends Model implements HasMedia
         $this->addMediaConversion('thumb')
             ->width(400)
             ->height(200)
-            ->nonQueued();
+            ->nonQueued()
+            ->keepOriginalImageFormat();
         $this->addMediaConversion('large')
             ->width(1920)
             ->height(800)
-            ->nonQueued();
+            ->nonQueued()
+            ->keepOriginalImageFormat();
     }
 
     public static function clearCache(): void
@@ -65,10 +67,6 @@ class Banner extends Model implements HasMedia
     {
         $media = $this->getFirstMedia('default');
         if ($media) {
-            $conversions = $media->getGeneratedConversions();
-            if ($conversions['large'] ?? false) {
-                return $media->getUrl('large');
-            }
             return $media->getUrl();
         }
         if ($this->image) {
