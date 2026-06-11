@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\PhoneHelper;
 use App\Http\Controllers\Controller;
 use App\Services\TwilioService;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +16,10 @@ class OtpController extends Controller
             'phone' => 'required|string|max:20',
         ]);
 
-        $sent = TwilioService::sendOtp($data['phone']);
+        $phone = PhoneHelper::normalize($data['phone']);
+        $e164 = '+964' . substr($phone, 1);
+
+        $sent = TwilioService::sendOtp($e164);
 
         if (! $sent) {
             return response()->json([
@@ -37,7 +41,10 @@ class OtpController extends Controller
             'code' => 'required|string|size:6',
         ]);
 
-        $verified = TwilioService::verifyOtp($data['phone'], $data['code']);
+        $phone = PhoneHelper::normalize($data['phone']);
+        $e164 = '+964' . substr($phone, 1);
+
+        $verified = TwilioService::verifyOtp($e164, $data['code']);
 
         if (! $verified) {
             return response()->json([

@@ -96,14 +96,10 @@ export default function BannersPage() {
 
       if (editing) {
         fd.append("_method", "PUT");
-        await api.post(`/admin/banners/${editing.id}`, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await api.post(`/admin/banners/${editing.id}`, fd);
         toast.success("تم تحديث البانر بنجاح");
       } else {
-        await api.post("/admin/banners", fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await api.post("/admin/banners", fd);
         toast.success("تم إنشاء البانر بنجاح");
       }
       setModalOpen(false);

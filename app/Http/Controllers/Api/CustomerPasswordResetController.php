@@ -48,13 +48,13 @@ class CustomerPasswordResetController extends Controller
     {
         $data = $request->validate([
             'phone' => 'required|string|max:32',
-            'token' => 'required|string|size:6',
+            'otp' => 'required|string|size:6',
             'password' => 'required|string|min:8|max:255|confirmed',
         ]);
 
         $phone = PhoneHelper::normalize($data['phone']);
 
-        $verified = SmsService::verifyOtp($phone, $data['token']);
+        $verified = SmsService::verifyOtp($phone, $data['otp']);
 
         if (! $verified) {
             return response()->json([

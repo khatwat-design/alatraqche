@@ -33,6 +33,7 @@ export default function CheckoutPage() {
   const [codeError, setCodeError] = useState("");
   const [sendingOtp, setSendingOtp] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
   const [orderResult, setOrderResult] = useState<{ ok: boolean; message: string; invoiceId?: string } | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [couponApplied, setCouponApplied] = useState("");
@@ -84,12 +85,13 @@ export default function CheckoutPage() {
       await doPlaceOrder();
     } else {
       setSendingOtp(true);
+      setFormError("");
       try {
         await requestOtp(customer.phone);
         setStep("otp");
         setCodeError("");
-      } catch {
-        setCodeError("فشل إرسال رمز التحقق. حاول مرة أخرى.");
+      } catch (e) {
+        setFormError(e instanceof Error ? e.message : "فشل إرسال رمز التحقق. حاول مرة أخرى.");
       } finally {
         setSendingOtp(false);
       }
@@ -101,6 +103,7 @@ export default function CheckoutPage() {
     if (fullCode.length !== 6) return;
     setSubmitting(true);
     setCodeError("");
+    setFormError("");
     try {
       const result = await verifyOtpWithData(customer.phone, fullCode, {
         name: customer.name,
@@ -305,7 +308,7 @@ export default function CheckoutPage() {
             </button>
 
             <button
-              onClick={() => { setStep("form"); setCodeError(""); }}
+              onClick={() => { setStep("form"); setCodeError(""); setFormError(""); }}
               disabled={submitting}
               className="mt-3 block w-full text-center text-sm text-gray-400 transition-colors hover:text-red-500 disabled:opacity-50"
             >
@@ -425,6 +428,10 @@ export default function CheckoutPage() {
                   <span>{formatPrice(finalTotal)}</span>
                 </div>
               </div>
+
+              {formError && (
+                <div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600">{formError}</div>
+              )}
 
               <button
                 onClick={handleSubmitOrder}

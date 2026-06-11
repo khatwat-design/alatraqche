@@ -9,7 +9,7 @@ use Twilio\Rest\Client;
 
 final class TwilioService
 {
-    private static function client(): ?Client
+    public static function client(): ?Client
     {
         $sid = config('services.twilio.sid');
         $token = config('services.twilio.token');
@@ -19,6 +19,29 @@ final class TwilioService
         }
 
         return new Client($sid, $token);
+    }
+
+    private static function toE164(string $phone): string
+    {
+        $p = preg_replace('/\D/', '', $phone);
+
+        if (str_starts_with($p, '00964')) {
+            return '+964' . substr($p, 5);
+        }
+
+        if (str_starts_with($p, '964')) {
+            return '+' . $p;
+        }
+
+        if (str_starts_with($p, '0')) {
+            return '+964' . substr($p, 1);
+        }
+
+        if (str_starts_with($p, '+')) {
+            return $p;
+        }
+
+        return '+964' . $p;
     }
 
     public static function sendOtp(string $phone): bool
@@ -32,16 +55,22 @@ final class TwilioService
 
         try {
             $client = self::client();
+            if (! $client) {
+                return false;
+            }
 
-            $client?->verify->v2->services($verifySid)
+            $client->verify->v2->services($verifySid)
                 ->verifications
-                ->create($phone, 'sms');
+                ->create(self::toE164($phone), 'sms');
 
             Log::info('OTP sent via Twilio Verify', ['phone' => $phone]);
 
             return true;
         } catch (\Throwable $e) {
-            report($e);
+            Log::error('Twilio Verify send failed', [
+                'phone' => $phone,
+                'error' => $e->getMessage(),
+            ]);
             return false;
         }
     }
@@ -57,24 +86,30 @@ final class TwilioService
 
         try {
             $client = self::client();
+            if (! $client) {
+                return false;
+            }
 
-            $check = $client?->verify->v2->services($verifySid)
+            $check = $client->verify->v2->services($verifySid)
                 ->verificationChecks
-                ->create($phone, ['code' => $code]);
+                ->create(self::toE164($phone), ['code' => $code]);
 
-            if ($check && $check->status === 'approved') {
+            if ($check->status === 'approved') {
                 Log::info('OTP verified via Twilio Verify', ['phone' => $phone]);
                 return true;
             }
 
             Log::warning('OTP verification failed', [
                 'phone' => $phone,
-                'status' => $check?->status ?? 'unknown',
+                'status' => $check->status,
             ]);
 
             return false;
         } catch (\Throwable $e) {
-            report($e);
+            Log::error('Twilio Verify check failed', [
+                'phone' => $phone,
+                'error' => $e->getMessage(),
+            ]);
             return false;
         }
     }
