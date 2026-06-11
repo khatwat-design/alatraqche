@@ -74,7 +74,7 @@ export function BannerCarousel({ banners }: Props) {
           >
             {displayBanners.map((banner) => (
               <div key={banner.id} className="min-w-0 shrink-0 grow-0 basis-full">
-                <div className="relative h-[240px] w-full bg-gray-100 md:h-[400px] lg:h-[480px]">
+                <div className="relative h-[240px] w-full bg-white md:h-[400px] lg:h-[480px]">
                   <img
                     src={banner.image}
                     alt={banner.title || "بانر"}

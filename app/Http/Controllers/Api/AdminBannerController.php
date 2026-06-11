@@ -10,9 +10,40 @@ use App\Http\Resources\BannerResource;
 use App\Models\Banner;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 
 class AdminBannerController extends Controller
 {
+    private function flattenImage(UploadedFile $file): UploadedFile
+    {
+        $path = $file->getPathname();
+        $mime = $file->getMimeType();
+
+        if (! in_array($mime, ['image/png', 'image/webp'])) {
+            return $file;
+        }
+
+        $func = $mime === 'image/png' ? 'imagecreatefrompng' : 'imagecreatefromwebp';
+        $src = @$func($path);
+        if (! $src) {
+            return $file;
+        }
+
+        $w = imagesx($src);
+        $h = imagesy($src);
+
+        $dst = imagecreatetruecolor($w, $h);
+        $white = imagecolorallocate($dst, 255, 255, 255);
+        imagefill($dst, 0, 0, $white);
+        imagecopy($dst, $src, 0, 0, 0, 0, $w, $h);
+
+        $tmp = tempnam(sys_get_temp_dir(), 'banner_');
+        imagepng($dst, $tmp);
+        imagedestroy($src);
+        imagedestroy($dst);
+
+        return new UploadedFile($tmp, $file->getClientOriginalName(), 'image/png', null, true);
+    }
     public function index(Request $request): BannerCollection
     {
         $perPage = min((int) $request->query('per_page', 50), 100);
@@ -51,7 +82,8 @@ class AdminBannerController extends Controller
         $banner->save();
 
         if ($request->hasFile('image')) {
-            $media = $banner->addMediaFromRequest('image')
+            $file = $this->flattenImage($request->file('image'));
+            $media = $banner->addMedia($file)
                 ->toMediaCollection('default');
             $banner->image = $media->getUrl();
             $banner->save();
@@ -88,7 +120,8 @@ class AdminBannerController extends Controller
 
         if ($request->hasFile('image')) {
             $banner->clearMediaCollection('default');
-            $media = $banner->addMediaFromRequest('image')
+            $file = $this->flattenImage($request->file('image'));
+            $media = $banner->addMedia($file)
                 ->toMediaCollection('default');
             $banner->image = $media->getUrl();
         }
