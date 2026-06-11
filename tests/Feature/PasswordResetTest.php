@@ -57,7 +57,7 @@ class PasswordResetTest extends TestCase
 
         $response = $this->postJson('/api/v1/auth/reset-password', [
             'phone' => '07712345678',
-            'token' => '123456',
+            'otp' => '123456',
             'password' => 'new-password-123',
             'password_confirmation' => 'new-password-123',
         ]);

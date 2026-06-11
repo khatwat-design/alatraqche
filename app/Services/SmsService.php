@@ -118,7 +118,7 @@ final class SmsService
 
             $check = $client->verify->v2->services($verifySid)
                 ->verificationChecks
-                ->create(self::toE164($phone), ['code' => $code]);
+                ->create(['to' => self::toE164($phone), 'code' => $code]);
 
             if ($check->status === 'approved') {
                 Log::info('OTP verified via Twilio Verify', ['phone' => $phone]);
