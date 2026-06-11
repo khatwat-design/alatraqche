@@ -15,6 +15,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronDown,
+  Tags,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
@@ -22,9 +23,9 @@ import { useAuthStore } from "@/stores/authStore";
 const navItems = [
   { href: "/", label: "لوحة التحكم", icon: LayoutDashboard },
   { href: "/products", label: "المنتجات", icon: Package },
+  { href: "/categories", label: "التصنيفات", icon: Tags },
   { href: "/orders", label: "الطلبات", icon: ShoppingCart },
   { href: "/customers", label: "العملاء", icon: Users },
-  { href: "/stores", label: "المتجر", icon: Store },
   { href: "/banners", label: "البنرات", icon: ImageIcon },
   { href: "/analytics", label: "التحليلات", icon: BarChart3 },
   { href: "/settings", label: "الإعدادات", icon: Settings },

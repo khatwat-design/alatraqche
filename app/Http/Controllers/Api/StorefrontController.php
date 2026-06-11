@@ -82,20 +82,15 @@ class StorefrontController extends Controller
         $perPage = min((int) $request->query('per_page', 50), 100);
         $search = $request->query('search');
 
-        if ($search) {
-            $productIds = Product::search($search)
-                ->query(fn ($q) => $q->where('is_visible', true))
-                ->take(100)
-                ->keys();
+        $query = Product::query()
+            ->with('category')
+            ->where('is_visible', true);
 
-            $query = Product::query()
-                ->with('category')
-                ->whereIn('id', $productIds)
-                ->where('is_visible', true);
-        } else {
-            $query = Product::query()
-                ->with('category')
-                ->where('is_visible', true);
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
         if ($categoryId = $request->query('category')) {

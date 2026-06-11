@@ -50,8 +50,6 @@ class AdminCategoryController extends Controller
             $category->save();
         }
 
-        $category->load('media');
-
         return response()->json([
             'ok' => true,
             'message' => 'تم إنشاء التصنيف بنجاح',
@@ -87,8 +85,6 @@ class AdminCategoryController extends Controller
         }
 
         $category->save();
-
-        $category->load('media');
 
         return response()->json([
             'ok' => true,

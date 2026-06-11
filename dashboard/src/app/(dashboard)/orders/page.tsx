@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
-import { Search, Eye, Filter, CheckSquare, Download, ChevronDown, XSquare } from "lucide-react";
+import { Search, Eye, Filter, CheckSquare, Download, ChevronDown, XSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import api from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -18,6 +18,13 @@ interface Order {
   customer_phone?: string;
 }
 
+interface Meta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
 const statusMap: Record<string, { label: string; badge: string }> = {
   pending: { label: "قيد الانتظار", badge: "badge-yellow" },
   confirmed: { label: "مؤكد", badge: "badge-blue" },
@@ -31,27 +38,49 @@ const statusFlow = ["pending", "confirmed", "processing", "shipped", "delivered"
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [meta, setMeta] = useState<Meta | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [bulkStatus, setBulkStatus] = useState("");
   const [bulkUpdating, setBulkUpdating] = useState(false);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  useEffect(() => {
-    api.get("/admin/orders?per_page=100").then(({ data }) => {
+  const fetchOrders = useCallback(async (p: number, q: string, s: string) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ per_page: "50", page: String(p) });
+      if (q) params.set("search", q);
+      if (s) params.set("status", s);
+      const { data } = await api.get(`/admin/orders?${params}`);
       setOrders(data.orders || data.data || data);
+      if (data.meta) setMeta(data.meta);
+    } catch {
+      toast.error("فشل تحميل الطلبات");
+    } finally {
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }
   }, []);
 
-  const filtered = orders.filter((o) => {
-    const matchSearch = !search ||
-      o.invoice_id?.toLowerCase().includes(search.toLowerCase()) ||
-      o.customer_name?.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = !statusFilter || o.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  useEffect(() => {
+    fetchOrders(page, search, statusFilter);
+  }, [page, search, statusFilter, fetchOrders]);
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => setPage(1), 400);
+  };
+
+  const handleStatusFilter = (value: string) => {
+    setStatusFilter(value);
+    setPage(1);
+  };
+
+  const filtered = orders;
+  const activeFilters = [statusFilter].filter(Boolean).length;
 
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) => {
@@ -120,8 +149,6 @@ export default function OrdersPage() {
     toast.success(`تم تصدير ${data.length} طلب بصيغة ${format.toUpperCase()}`);
   };
 
-  const activeFilters = [statusFilter].filter(Boolean).length;
-
   return (
     <div className="animate-fade-in">
       {/* Header */}
@@ -160,7 +187,7 @@ export default function OrdersPage() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             placeholder="بحث برقم الفاتورة أو اسم العميل..."
             className="input-field pr-9"
           />
@@ -169,7 +196,7 @@ export default function OrdersPage() {
           <Filter className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => handleStatusFilter(e.target.value)}
             className="input-field w-40 pr-9 appearance-none cursor-pointer"
           >
             <option value="">كل الحالات</option>
@@ -179,7 +206,7 @@ export default function OrdersPage() {
           </select>
         </div>
         {activeFilters > 0 && (
-          <button onClick={() => setStatusFilter("")} className="btn-ghost text-xs text-gray-500">
+          <button onClick={() => handleStatusFilter("")} className="btn-ghost text-xs text-gray-500">
             إعادة تعيين
           </button>
         )}
@@ -304,6 +331,52 @@ export default function OrdersPage() {
               ))}
             </tbody>
           </table>
+        )}
+
+        {/* Pagination */}
+        {meta && meta.last_page > 1 && (
+          <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3">
+            <span className="text-sm text-gray-500">
+              الصفحة {meta.current_page} من {meta.last_page}
+              {" — "}
+              <span className="font-medium text-gray-700">{meta.total}</span> طلب
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className="btn-ghost p-1.5 text-gray-500 disabled:opacity-30"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+              {Array.from({ length: meta.last_page }, (_, i) => i + 1)
+                .filter((p) => p === 1 || p === meta.last_page || Math.abs(p - meta.current_page) <= 1)
+                .map((p, idx, arr) => (
+                  <span key={p} className="flex items-center gap-1">
+                    {idx > 0 && arr[idx - 1] !== p - 1 && (
+                      <span className="px-1 text-gray-300">...</span>
+                    )}
+                    <button
+                      onClick={() => setPage(p)}
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium transition-all ${
+                        p === meta.current_page
+                          ? "gold-gradient text-white shadow-sm"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  </span>
+                ))}
+              <button
+                onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+                disabled={page >= meta.last_page}
+                className="btn-ghost p-1.5 text-gray-500 disabled:opacity-30"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

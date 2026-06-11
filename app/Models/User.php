@@ -22,6 +22,8 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'phone_number',
         'is_admin',
+        'role',
+        'job_title',
     ];
 
     protected $hidden = [
@@ -41,5 +43,21 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         return (bool) $this->is_admin;
+    }
+
+    public function isRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        return match ($this->role) {
+            'admin' => true,
+            'manager' => in_array($permission, ['products', 'orders', 'customers', 'categories', 'coupons', 'banners']),
+            'editor' => in_array($permission, ['products', 'categories']),
+            'viewer' => false,
+            default => false,
+        };
     }
 }

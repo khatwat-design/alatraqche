@@ -39,18 +39,21 @@ class Banner extends Model implements HasMedia
         static::deleted(fn () => cache()->forget('storefront.banners'));
     }
 
-    public function registerMediaCollections(?Media $media = null): void
+    public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('default')
-            ->singleFile()
-            ->registerMediaConversions(function (Media $media) {
-                $this->addMediaConversion('thumb')
-                    ->width(400)
-                    ->height(200);
-                $this->addMediaConversion('large')
-                    ->width(1920)
-                    ->height(800);
-            });
+        $this->addMediaCollection('default');
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(400)
+            ->height(200)
+            ->nonQueued();
+        $this->addMediaConversion('large')
+            ->width(1920)
+            ->height(800)
+            ->nonQueued();
     }
 
     public static function clearCache(): void
@@ -60,16 +63,12 @@ class Banner extends Model implements HasMedia
 
     public function getImagePublicUrlAttribute(): string
     {
-        $media = $this->getFirstMedia('default');
-        if ($media) {
-            $conversions = $media->getGeneratedConversions();
-            if ($conversions['large'] ?? false) {
-                return $media->getUrl('large');
-            }
-            return $media->getUrl();
-        }
         if ($this->image) {
             return AssetHelper::publicUrl($this->image) ?? '';
+        }
+        $media = $this->getFirstMedia('default');
+        if ($media) {
+            return $media->getUrl();
         }
         return '';
     }

@@ -24,10 +24,13 @@ export function ProductsGrid({ products, meta }: ProductsGridProps) {
   if (products.length === 0) {
     return (
       <div className="py-20 text-center">
-        <div className="mb-4 text-5xl">🔍</div>
+        <div className="mb-4 text-6xl">🔍</div>
         <h3 className="mb-2 text-lg font-medium text-dark-900">لا توجد منتجات</h3>
-        <p className="mb-5 text-sm text-gray-500">جرب تغيير الفلاتر أو ابحث بكلمة مختلفة</p>
-        <Link href="/products" className="text-sm text-brand-600 underline underline-offset-2">
+        <p className="mb-6 text-sm text-gray-500">جرب تغيير الفلاتر أو ابحث بكلمة مختلفة</p>
+        <Link
+          href="/products"
+          className="btn-primary text-sm"
+        >
           عرض كل المنتجات
         </Link>
       </div>
@@ -37,19 +40,22 @@ export function ProductsGrid({ products, meta }: ProductsGridProps) {
   return (
     <div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+        {products.map((product, idx) => (
+          <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${idx * 60}ms` }}>
+            <ProductCard product={product} />
+          </div>
         ))}
       </div>
 
+      {/* Pagination */}
       {meta.last_page > 1 && (
-        <div className="mt-10 flex items-center justify-center gap-2">
+        <div className="mt-12 flex items-center justify-center gap-2">
           <button
             onClick={() => goToPage(meta.current_page - 1)}
             disabled={meta.current_page === 1}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-30"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-all hover:border-brand-300 hover:text-brand-600 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:text-gray-500 disabled:hover:bg-transparent"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={18} />
           </button>
           {Array.from({ length: meta.last_page }, (_, i) => i + 1)
             .filter((p) => p === 1 || p === meta.last_page || Math.abs(p - meta.current_page) <= 1)
@@ -60,17 +66,17 @@ export function ProductsGrid({ products, meta }: ProductsGridProps) {
             }, [])
             .map((p, i) =>
               p === "..." ? (
-                <span key={`e${i}`} className="flex h-9 w-9 items-center justify-center text-sm text-gray-400">
+                <span key={`e${i}`} className="flex h-10 w-10 items-center justify-center text-sm text-gray-400">
                   …
                 </span>
               ) : (
                 <button
                   key={p}
                   onClick={() => goToPage(p as number)}
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border text-sm transition-colors ${
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-bold transition-all ${
                     p === meta.current_page
-                      ? "border-brand-600 bg-brand-600 text-white"
-                      : "border-gray-200 text-gray-700 hover:border-gray-400"
+                      ? "gold-gradient text-white border-brand-600 shadow-md"
+                      : "border-gray-200 text-dark-700 hover:border-brand-300 hover:text-brand-600 hover:bg-brand-50"
                   }`}
                 >
                   {p}
@@ -80,9 +86,9 @@ export function ProductsGrid({ products, meta }: ProductsGridProps) {
           <button
             onClick={() => goToPage(meta.current_page + 1)}
             disabled={meta.current_page === meta.last_page}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-30"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-all hover:border-brand-300 hover:text-brand-600 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:text-gray-500 disabled:hover:bg-transparent"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={18} />
           </button>
         </div>
       )}

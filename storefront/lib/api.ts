@@ -96,6 +96,17 @@ export async function getStoreSettings(): Promise<StoreSettings | null> {
   }
 }
 
+export async function checkPhone(phone: string): Promise<{ exists: boolean; customer: { id: number; name: string | null; phone: string; city: string | null; address: string | null } | null } | null> {
+  try {
+    return await apiFetch('/auth/check-phone', {
+      method: 'POST',
+      body: JSON.stringify({ phone }),
+    })
+  } catch {
+    return null
+  }
+}
+
 export async function validateCoupon(code: string, subtotal: number): Promise<CouponValidation | null> {
   try {
     return await apiFetch<CouponValidation>(`/coupons/validate/${encodeURIComponent(code)}?subtotal=${subtotal}`)
@@ -110,8 +121,6 @@ export async function placeOrder(orderData: {
     phone: string
     city?: string
     address?: string
-    carType?: string
-    carModel?: string
     notes?: string
     paymentMethod?: string
   }

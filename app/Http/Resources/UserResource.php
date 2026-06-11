@@ -14,8 +14,9 @@ class UserResource extends JsonResource
             'name' => trim($this->first_name . ' ' . $this->last_name),
             'email' => $this->email,
             'phone' => $this->phone_number ?? '',
-            'role' => 'admin',
-            'is_admin' => true,
+            'role' => $this->role ?? 'admin',
+            'job_title' => $this->job_title ?? '',
+            'is_admin' => (bool) $this->is_admin,
         ];
     }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, ArrowLeft } from "lucide-react";
@@ -15,8 +15,29 @@ const computeKey = (productId: string, options: SelectedOption[]): string => {
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, total, count } = useCart();
+  const [couponCode, setCouponCode] = useState("");
+  const [couponMsg, setCouponMsg] = useState<string | null>(null);
+  const [discount, setDiscount] = useState(0);
+  const [_couponApplied, setCouponApplied] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const cartTotal = total();
+  const finalTotal = Math.max(0, cartTotal - discount);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setApplyingCoupon(true);
+    const result = await validateCoupon(couponCode.trim(), cartTotal);
+    if (result && result.ok) {
+      setDiscount(result.discount);
+      setCouponMsg(`✅ خصم ${result.type === "percentage" ? result.value + "%" : formatPrice(result.value)}`);
+      setCouponApplied(couponCode.trim());
+    } else {
+      setCouponMsg("❌ الكوبون غير صالح أو منتهي الصلاحية");
+      setDiscount(0);
+    }
+    setApplyingCoupon(false);
+  };
 
   const itemsWithKeys = useMemo(
     () => items.map((item) => ({ ...item, cartKey: computeKey(item.product.id, item.selectedOptions) })),
@@ -88,14 +109,14 @@ export default function CartPage() {
                           if (nq <= 0) removeItem(item.cartKey);
                           else updateQuantity(item.cartKey, nq);
                         }}
-                        className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-brand-50 hover:text-brand-600"
+                        className="flex h-10 w-10 items-center justify-center rounded-md transition-colors hover:bg-brand-50 hover:text-brand-600 md:h-8 md:w-8"
                       >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M5 12h14" /></svg>
                       </button>
-                      <span className="flex h-8 w-10 items-center justify-center text-sm font-bold text-dark-900">{item.quantity}</span>
+                      <span className="flex h-10 w-10 items-center justify-center text-sm font-bold text-dark-900 md:h-8 md:w-8">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.cartKey, item.quantity + 1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-brand-50 hover:text-brand-600"
+                        className="flex h-10 w-10 items-center justify-center rounded-md transition-colors hover:bg-brand-50 hover:text-brand-600 md:h-8 md:w-8"
                       >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M12 5v14M5 12h14" /></svg>
                       </button>
@@ -115,10 +136,32 @@ export default function CartPage() {
           })}
         </div>
 
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-4">
+          <div className="card p-6">
+            <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-dark-900">
+              <ShoppingBag size={18} className="text-brand-500" />
+              كود الخصم
+            </h3>
+            <div className="flex gap-2">
+              <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)}
+                placeholder="كود الخصم"
+                className="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10"
+                onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()} />
+              <button onClick={handleApplyCoupon} disabled={applyingCoupon || !couponCode.trim()}
+                className="rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-all hover:bg-brand-700 disabled:opacity-50">
+                {applyingCoupon ? (
+                  <span className="flex h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : "تطبيق"}
+              </button>
+            </div>
+            {couponMsg && (
+              <p className={`mt-2 text-xs ${couponMsg.startsWith("✅") ? "text-green-600" : "text-red-500"}`}>{couponMsg}</p>
+            )}
+          </div>
+
           <div className="card sticky top-24">
             <h3 className="mb-5 flex items-center gap-2 text-base font-bold text-dark-900">
-              <ShoppingBag size={18} className="text-brand-500" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-[18px] w-[18px] text-brand-500"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
               ملخص الطلب
             </h3>
             <div className="space-y-3 text-sm">
@@ -126,17 +169,26 @@ export default function CartPage() {
                 <span>المجموع الفرعي</span>
                 <span className="font-medium text-dark-900">{formatPrice(cartTotal)}</span>
               </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>الخصم</span>
+                  <span className="font-medium">-{formatPrice(discount)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-gray-600">
                 <span>التوصيل</span>
                 <span className="text-gray-400">يُحتسب لاحقاً</span>
               </div>
               <div className="flex justify-between border-t border-gray-100 pt-3 text-base font-bold text-dark-900">
                 <span>المجموع</span>
-                <span>{formatPrice(cartTotal)}</span>
+                <span>{formatPrice(finalTotal)}</span>
               </div>
             </div>
 
-            <Link href="/checkout" className="btn-primary mt-5 flex w-full items-center justify-center gap-2">
+            <Link
+              href={`/checkout/phone${_couponApplied ? `?coupon=${encodeURIComponent(_couponApplied)}` : ""}`}
+              className="btn-primary mt-5 flex w-full items-center justify-center gap-2"
+            >
               إتمام الطلب <ArrowLeft size={16} />
             </Link>
           </div>

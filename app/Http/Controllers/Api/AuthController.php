@@ -11,6 +11,27 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
+    public function checkPhone(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'phone' => 'required|string|max:20',
+        ]);
+
+        $phone = PhoneHelper::normalize($data['phone']);
+        $customer = Customer::query()->where('phone', $phone)->first();
+
+        return response()->json([
+            'exists' => $customer !== null,
+            'customer' => $customer ? [
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'phone' => $customer->phone,
+                'city' => $customer->city,
+                'address' => $customer->address,
+            ] : null,
+        ]);
+    }
+
     public function requestOtp(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -48,6 +69,9 @@ class AuthController extends Controller
         $data = $request->validate([
             'phone' => 'required|string|max:20',
             'code' => 'required|string|size:6',
+            'name' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:128',
+            'address' => 'nullable|string|max:512',
         ]);
 
         $phone = PhoneHelper::normalize($data['phone']);
@@ -76,12 +100,17 @@ class AuthController extends Controller
         if (! $customer) {
             $customer = Customer::query()->create([
                 'phone' => $phone,
-                'name' => null,
+                'name' => $data['name'] ?? null,
+                'city' => $data['city'] ?? null,
+                'address' => $data['address'] ?? null,
                 'phone_verified_at' => now(),
             ]);
             $isNew = true;
         } else {
             $customer->phone_verified_at = now();
+            if (!empty($data['name'])) $customer->name = $data['name'];
+            if (!empty($data['city'])) $customer->city = $data['city'];
+            if (!empty($data['address'])) $customer->address = $data['address'];
             $customer->save();
         }
 
@@ -94,8 +123,10 @@ class AuthController extends Controller
             'tokenType' => 'Bearer',
             'user' => [
                 'id' => $customer->id,
-                'phone' => $customer->phone,
                 'name' => $customer->name,
+                'phone' => $customer->phone,
+                'city' => $customer->city,
+                'address' => $customer->address,
             ],
             'is_new_user' => $isNew,
         ]);

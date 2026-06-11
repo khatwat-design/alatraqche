@@ -41,7 +41,17 @@ export async function verifyOtp(phone: string, code: string) {
     ok: boolean
     token: string
     tokenType: string
-    user: { id: number; phone: string; name: string | null }
+    user: { id: number; phone: string; name: string | null; city: string | null; address: string | null }
     is_new_user: boolean
   }>('/auth/verify-otp', { phone, code })
+}
+
+export async function verifyOtpWithData(phone: string, code: string, data: { name?: string; city?: string; address?: string }) {
+  return authFetch<{
+    ok: boolean
+    token: string
+    tokenType: string
+    user: { id: number; phone: string; name: string | null; city: string | null; address: string | null }
+    is_new_user: boolean
+  }>('/auth/verify-otp', { phone, code, ...data })
 }

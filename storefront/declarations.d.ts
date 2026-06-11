@@ -29,5 +29,16 @@ declare module 'lucide-react' {
   const Car: React.FC<LucideProps>
   const Mail: React.FC<LucideProps>
   const Package: React.FC<LucideProps>
-  export { ShoppingCart, Search, Menu, X, ChevronDown, ChevronRight, ChevronLeft, Phone, Heart, SlidersHorizontal, ArrowLeft, Truck, Shield, Star, Trash2, Plus, Minus, ShoppingBag, MapPin, Clock, User, LogOut, Car, Mail, Package }
+  const Eye: React.FC<LucideProps>
+  const ShieldCheck: React.FC<LucideProps>
+  const Headphones: React.FC<LucideProps>
+  const CreditCard: React.FC<LucideProps>
+  const MessageCircle: React.FC<LucideProps>
+  const Globe: React.FC<LucideProps>
+  const Tag: React.FC<LucideProps>
+  const Loader: React.FC<LucideProps>
+  const Loader2: React.FC<LucideProps>
+  const CheckCircle: React.FC<LucideProps>
+  const XCircle: React.FC<LucideProps>
+  export { ShoppingCart, Search, Menu, X, ChevronDown, ChevronRight, ChevronLeft, Phone, Heart, SlidersHorizontal, ArrowLeft, Truck, Shield, Star, Trash2, Plus, Minus, ShoppingBag, MapPin, Clock, User, LogOut, Car, Mail, Package, Eye, ShieldCheck, Headphones, CreditCard, MessageCircle, Globe, Tag, Loader2, CheckCircle, XCircle }
 }

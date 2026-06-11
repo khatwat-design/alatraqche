@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { getCategories } from "@/lib/api";
+import { getCategories, getStoreSettings } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "الأطرقجي للسجاد والأثاث والمفروشات",
@@ -10,14 +10,17 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const categories = await getCategories();
+  const [categories, store] = await Promise.all([
+    getCategories(),
+    getStoreSettings(),
+  ]);
 
   return (
     <html lang="ar" dir="rtl">
       <body className="flex min-h-screen flex-col bg-gray-50 text-dark-900 antialiased">
         <Navbar categories={categories} />
         <main className="flex-1">{children}</main>
-        <Footer categories={categories} />
+        <Footer categories={categories} store={store} />
       </body>
     </html>
   );

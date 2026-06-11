@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class OrderApiController extends Controller
 {
@@ -52,8 +53,6 @@ class OrderApiController extends Controller
             'customer.phone' => 'required|string|max:32',
             'customer.city' => 'nullable|string|max:128',
             'customer.address' => 'nullable|string|max:512',
-            'customer.carType' => 'nullable|string|max:255',
-            'customer.carModel' => 'nullable|string|max:255',
             'customer.notes' => 'nullable|string|max:2000',
             'customer.paymentMethod' => 'nullable|string|max:64',
             'items' => 'required|array|min:1',
@@ -107,13 +106,26 @@ class OrderApiController extends Controller
                     }
                 }
 
-                $phone = PhoneHelper::normalize($data['customer']['phone']);
+                $customer = null;
+                if ($bearer = $request->bearerToken()) {
+                    $accessToken = PersonalAccessToken::findToken($bearer);
+                    $customer = $accessToken?->tokenable;
+                }
 
-                $customer = Customer::query()->firstOrCreate(
-                    ['phone' => $phone],
-                    ['name' => $data['customer']['name']]
-                );
+                if (! $customer) {
+                    $phone = PhoneHelper::normalize($data['customer']['phone']);
+
+                    $customer = Customer::query()->firstOrCreate(
+                        ['phone' => $phone],
+                        ['name' => $data['customer']['name']]
+                    );
+                } else {
+                    $phone = $customer->phone;
+                }
+
                 $customer->name = $data['customer']['name'];
+                if (!empty($data['customer']['city'])) $customer->city = $data['customer']['city'];
+                if (!empty($data['customer']['address'])) $customer->address = $data['customer']['address'];
                 $customer->save();
 
                 $totalAfterDiscount = max(0, (float) $data['summary']['total'] - $discount);
@@ -126,8 +138,6 @@ class OrderApiController extends Controller
                     'customer_phone' => $phone,
                     'customer_city' => $data['customer']['city'] ?? null,
                     'customer_address' => $data['customer']['address'] ?? null,
-                    'floor_note' => $data['customer']['carType'] ?? null,
-                    'delivery_time_note' => $data['customer']['carModel'] ?? null,
                     'notes' => $data['customer']['notes'] ?? null,
                     'payment_method' => $data['customer']['paymentMethod'] ?? 'cod',
                     'subtotal' => $data['summary']['subtotal'],
@@ -170,7 +180,7 @@ class OrderApiController extends Controller
         $storeToken = null;
         $customer = Customer::query()->whereKey($order->customer_id)->first();
         if ($customer) {
-            $phone = PhoneHelper::normalize($data['customer']['phone']);
+            $phone = $customer->phone;
 
             if (empty($customer->password)) {
                 $customer->password = bcrypt($phone);

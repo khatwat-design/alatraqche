@@ -45,8 +45,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           <FiltersPanel categories={categories} searchParams={params} />
         </aside>
         <div className="min-w-0 flex-1">
-          <div className="mb-5 flex items-center gap-3 lg:hidden">
+          <div className="mb-5 flex flex-wrap items-center gap-3 lg:hidden">
             <FiltersPanel categories={categories} searchParams={params} mobile />
+            <div className="mr-auto flex items-center gap-2">
+              <span className="text-sm text-gray-400">{productsData.meta.total} منتج</span>
+              <SortSelect current={params.sort} />
+            </div>
           </div>
           <div className="mb-5 hidden items-center justify-between lg:flex">
             <span className="text-sm text-gray-500">{productsData.meta.total} منتج</span>

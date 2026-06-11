@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingCart, Search, Menu, X, ChevronDown, Phone, User, LogOut, Package } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, ChevronDown, User, Package } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import type { Category } from "@/types";
@@ -32,7 +32,6 @@ export function Navbar({ categories }: NavbarProps) {
   const phone1 = phones[0] ?? "07729002266";
   const phone2 = phones[1];
   const waLink1 = `https://wa.me/964${phone1.replace(/^0/, "")}`;
-  const waLink2 = phone2 ? `https://wa.me/964${phone2.replace(/^0/, "")}` : waLink1;
 
   useEffect(() => {
     setLoggedIn(!!getStoredToken());
@@ -182,7 +181,7 @@ export function Navbar({ categories }: NavbarProps) {
               ) : (
                 <Link
                   href="/auth/login"
-                  className="hidden rounded-lg p-2 text-gray-400 transition-colors hover:bg-brand-50 hover:text-brand-600 md:block"
+                  className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-brand-50 hover:text-brand-600"
                   aria-label="تسجيل الدخول"
                 >
                   <User size={19} />
@@ -214,7 +213,7 @@ export function Navbar({ categories }: NavbarProps) {
         {/* Mobile menu */}
         <div
           className={`overflow-hidden border-t border-gray-100 bg-white transition-all duration-300 lg:hidden ${
-            menuOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+            menuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
           }`}
         >
           <nav className="mx-auto max-w-7xl space-y-0.5 px-4 py-3">

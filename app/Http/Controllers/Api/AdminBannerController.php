@@ -51,9 +51,10 @@ class AdminBannerController extends Controller
         $banner->save();
 
         if ($request->hasFile('image')) {
-            $banner->addMediaFromRequest('image')
+            $media = $banner->addMediaFromRequest('image')
                 ->toMediaCollection('default');
-            $banner->load('media');
+            $banner->image = $media->getUrl();
+            $banner->save();
         }
 
         return response()->json([
@@ -87,8 +88,9 @@ class AdminBannerController extends Controller
 
         if ($request->hasFile('image')) {
             $banner->clearMediaCollection('default');
-            $banner->addMediaFromRequest('image')
+            $media = $banner->addMediaFromRequest('image')
                 ->toMediaCollection('default');
+            $banner->image = $media->getUrl();
         }
 
         $banner->save();

@@ -7,6 +7,7 @@ interface User {
   email: string;
   phone: string;
   role: string;
+  job_title: string;
   is_admin: boolean;
 }
 

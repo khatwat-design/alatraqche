@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { forgotPassword, resetPassword, setStoredToken } from "@/lib/api";
 
 function PhoneIcon({ className }: { className?: string }) {

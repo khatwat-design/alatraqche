@@ -9,6 +9,7 @@ use App\Http\Resources\CustomerCollection;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Services\Admin\AdminCustomerService;
+use App\Services\CustomerExportService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -88,5 +89,28 @@ class AdminCustomerController extends Controller
             'ok' => true,
             'message' => 'تم حذف العميل بنجاح',
         ]);
+    }
+
+    public function export(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\Response
+    {
+        $format = $request->query('format', 'csv');
+
+        if (! in_array($format, ['csv', 'json', 'xlsx', 'ods'])) {
+            return response()->json(['message' => 'الصيغة غير مدعومة. اختر csv, json, xlsx, ods'], 400);
+        }
+
+        $search = $request->query('search');
+
+        $query = Customer::query();
+
+        if ($search) {
+            $query->where(function (\Illuminate\Database\Eloquent\Builder $q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        return CustomerExportService::download($query, $format);
     }
 }

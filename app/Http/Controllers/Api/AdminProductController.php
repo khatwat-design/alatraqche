@@ -16,11 +16,19 @@ class AdminProductController extends Controller
     public function index(Request $request): ProductCollection
     {
         $perPage = min((int) $request->query('per_page', 50), 100);
+        $search = $request->query('search');
 
-        $products = Product::query()
-            ->with('category', 'options.values')
-            ->orderByDesc('created_at')
-            ->paginate($perPage);
+        $query = Product::query()
+            ->with('category', 'options.values');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $products = $query->orderByDesc('created_at')->paginate($perPage);
 
         return new ProductCollection($products);
     }

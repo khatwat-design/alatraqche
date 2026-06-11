@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminBannerController;
 use App\Http\Controllers\Api\AdminCategoryController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdminCouponController;
+use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AdminCustomerController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\AdminOrderController;
@@ -35,6 +36,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/orders', [OrderApiController::class, 'store'])->middleware('throttle:20,1');
     Route::get('/coupons/validate/{code}', [OrderApiController::class, 'validateCoupon']);
 
+    Route::post('/auth/check-phone', [AuthController::class, 'checkPhone']);
     Route::post('/auth/request-otp', [AuthController::class, 'requestOtp'])->middleware('throttle:5,1');
     Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:5,1');
 
@@ -69,12 +71,19 @@ Route::prefix('v1')->group(function () {
             Route::get('/admin/store', [AdminController::class, 'getStore']);
             Route::put('/admin/store', [AdminController::class, 'updateStore']);
 
+            Route::get('/admin/users', [AdminUserController::class, 'index']);
+            Route::get('/admin/users/{id}', [AdminUserController::class, 'show']);
+            Route::post('/admin/users', [AdminUserController::class, 'store']);
+            Route::put('/admin/users/{id}', [AdminUserController::class, 'update']);
+            Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
+
             Route::get('/admin/orders', [AdminOrderController::class, 'index']);
             Route::get('/admin/orders/{id}', [AdminOrderController::class, 'show']);
             Route::put('/admin/orders/{id}', [AdminOrderController::class, 'update']);
             Route::delete('/admin/orders/{id}', [AdminOrderController::class, 'destroy']);
 
             Route::get('/admin/customers', [AdminCustomerController::class, 'index']);
+            Route::get('/admin/customers/export', [AdminCustomerController::class, 'export']);
             Route::get('/admin/customers/{id}', [AdminCustomerController::class, 'show']);
             Route::post('/admin/customers', [AdminCustomerController::class, 'store']);
             Route::put('/admin/customers/{id}', [AdminCustomerController::class, 'update']);

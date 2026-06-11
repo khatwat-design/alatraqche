@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import BottomNav from "@/components/layout/BottomNav";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
 
@@ -41,8 +42,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex flex-1 flex-col">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 page-container">{children}</main>
+        <main className="flex-1 page-container pb-20 lg:pb-0">{children}</main>
       </div>
+      <BottomNav />
       <Toaster
         position="top-center"
         toastOptions={{

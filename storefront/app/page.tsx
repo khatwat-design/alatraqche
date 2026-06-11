@@ -2,7 +2,7 @@ import { getBanners, getCategories, getProducts, getStoreSettings } from "@/lib/
 import { BannerCarousel } from "@/components/store/BannerCarousel";
 import { ProductCard } from "@/components/store/ProductCard";
 import Link from "next/link";
-import { ArrowLeft, ShoppingBag, Phone } from "lucide-react";
+import { ArrowLeft, Truck, ShieldCheck, Headphones, CreditCard, Star, Package } from "lucide-react";
 
 export default async function HomePage() {
   const [banners, categories, productsData, store] = await Promise.all([
@@ -18,77 +18,190 @@ export default async function HomePage() {
     <>
       <BannerCarousel banners={banners} />
 
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <div className="flex flex-col items-center rounded-2xl bg-white p-6 text-center shadow-sm">
-            <svg className="mb-3 h-8 w-8 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
-            <h3 className="text-sm font-semibold text-dark-900">توصيل سريع</h3>
-            <p className="mt-1 text-xs text-gray-500">لجميع محافظات العراق</p>
-          </div>
-          <div className="flex flex-col items-center rounded-2xl bg-white p-6 text-center shadow-sm">
-            <svg className="mb-3 h-8 w-8 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-            <h3 className="text-sm font-semibold text-dark-900">جودة مضمونة</h3>
-            <p className="mt-1 text-xs text-gray-500">منتجات أصلية ١٠٠٪</p>
-          </div>
-          <div className="flex flex-col items-center rounded-2xl bg-white p-6 text-center shadow-sm">
-            <Phone className="mb-3 h-8 w-8 text-brand-500" />
-            <h3 className="text-sm font-semibold text-dark-900">دعم متواصل</h3>
-            <p className="mt-1 text-xs text-gray-500">خدمة عملاء على مدار اليوم</p>
-          </div>
-          <div className="flex flex-col items-center rounded-2xl bg-white p-6 text-center shadow-sm">
-            <ShoppingBag className="mb-3 h-8 w-8 text-brand-500" />
-            <h3 className="text-sm font-semibold text-dark-900">دفع آمن</h3>
-            <p className="mt-1 text-xs text-gray-500">الدفع عند الاستلام</p>
-          </div>
+      {/* Features Strip */}
+      <section className="relative -mt-6 z-10 mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {[
+            { icon: Truck, title: "توصيل سريع", desc: "لجميع محافظات العراق", color: "text-blue-600", bg: "bg-blue-50" },
+            { icon: ShieldCheck, title: "جودة مضمونة", desc: "منتجات أصلية ١٠٠٪", color: "text-green-600", bg: "bg-green-50" },
+            { icon: Headphones, title: "دعم متواصل", desc: "خدمة عملاء يومياً", color: "text-purple-600", bg: "bg-purple-50" },
+            { icon: CreditCard, title: "دفع آمن", desc: "الدفع عند الاستلام", color: "text-amber-600", bg: "bg-amber-50" },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+            >
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${item.bg}`}>
+                <item.icon className={`h-5 w-5 ${item.color}`} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-dark-900">{item.title}</h3>
+                <p className="text-xs text-gray-500">{item.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
+      {/* Categories */}
       {categories.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-dark-900">الأقسام</h2>
-            <Link href="/products" className="flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700">
-              الكل <ArrowLeft size={16} />
+        <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-dark-900">الأقسام</h2>
+              <p className="mt-1 text-sm text-gray-500">تصفح حسب التصنيف</p>
+            </div>
+            <Link
+              href="/products"
+              className="btn-secondary text-sm"
+            >
+              عرض الكل
+              <ArrowLeft size={16} />
             </Link>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-            {categories.map((cat) => (
+          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-none">
+            {categories.map((cat, idx) => (
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.id}`}
-                className="flex shrink-0 flex-col items-center gap-2 rounded-2xl bg-white px-6 py-4 shadow-sm transition-shadow hover:shadow-md"
+                className="group flex shrink-0 flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white px-8 py-5 shadow-sm transition-all hover:shadow-md hover:border-brand-200 hover:-translate-y-0.5"
+                style={{ animationDelay: `${idx * 50}ms` }}
               >
-                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-brand-50 text-lg font-bold text-brand-600">
+                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl gold-gradient text-xl font-bold text-white shadow-sm transition-transform group-hover:scale-110">
                   {cat.image ? (
                     <img src={cat.image} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    cat.name.charAt(0)
+                    <Package className="h-7 w-7" />
                   )}
                 </div>
-                <span className="whitespace-nowrap text-sm font-medium text-dark-900">{cat.name}</span>
+                <span className="whitespace-nowrap text-sm font-medium text-dark-900 group-hover:text-brand-600 transition-colors">
+                  {cat.name}
+                </span>
               </Link>
             ))}
           </div>
         </section>
       )}
 
+      {/* Featured Products */}
       {featuredProducts.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-dark-900">منتجات مميزة</h2>
-            <Link href="/products" className="flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700">
-              عرض الكل <ArrowLeft size={16} />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+        <section className="bg-gray-50/80 py-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-8 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-dark-900">منتجات مميزة</h2>
+                <p className="mt-1 text-sm text-gray-500">اختر من بين أفضل منتجاتنا</p>
+              </div>
+              <Link
+                href="/products"
+                className="btn-primary text-sm"
+              >
+                عرض الكل
+                <ArrowLeft size={16} />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {featuredProducts.map((product, idx) => (
+                <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${idx * 80}ms` }}>
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
+      {/* Stats Section */}
+      {store && (
+        <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+          <div className="relative overflow-hidden rounded-3xl gold-gradient px-6 py-12 text-center text-white shadow-xl sm:px-12">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE4YzEuNjU3IDAgMy0xLjM0MyAzLTNzLTEuMzQzLTMtMy0zLTMgMS4zNDMtMyAzIDEuMzQzIDMgMyAzem0wIDM2YzEuNjU3IDAgMy0xLjM0MyAzLTNzLTEuMzQzLTMtMy0zLTMgMS4zNDMtMyAzIDEuMzQzIDMgMyAzeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
+            <div className="relative z-10">
+              <h2 className="text-2xl font-bold md:text-3xl">{store.storeName || "الأطرقجي"}</h2>
+              <div className="mt-2 text-lg text-white/80">{store.sloganLine1}</div>
+              <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-4">
+                <div>
+                  <div className="text-3xl font-bold">{productsData.meta.total}+</div>
+                  <div className="mt-1 text-sm text-white/70">منتج</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold">{categories.length}+</div>
+                  <div className="mt-1 text-sm text-white/70">تصنيف</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold">جميع</div>
+                  <div className="mt-1 text-sm text-white/70">محافظات العراق</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold">٢٤</div>
+                  <div className="mt-1 text-sm text-white/70">ساعة توصيل</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
+      {/* Features Detail */}
+      <section className="bg-white py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mb-10 text-center">
+            <h2 className="text-2xl font-bold text-dark-900">لماذا الأطرقجي؟</h2>
+            <p className="mt-2 text-sm text-gray-500">نقدم لك أفضل تجربة تسوق للسجاد والمفروشات</p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {[
+              {
+                icon: Truck,
+                title: "توصيل لجميع المحافظات",
+                desc: "نوصل طلبك لباب بيتك في كل محافظات العراق خلال 24-48 ساعة من تاريخ الطلب.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "جودة ومنتجات أصلية",
+                desc: "نضمن لك جودة كل منتج. جميع منتجاتنا أصلية ومختارة بعناية لتناسب ذوقك.",
+              },
+              {
+                icon: Headphones,
+                title: "دعم فوري 24/7",
+                desc: "فريق خدمة العملاء متاح يومياً من 9 صباحاً حتى 11 مساءً للرد على استفساراتك.",
+              },
+            ].map((item) => (
+              <div key={item.title} className="group card p-8 text-center">
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl gold-gradient text-white shadow-lg transition-transform group-hover:scale-110">
+                  <item.icon className="h-7 w-7" />
+                </div>
+                <h3 className="mb-2 text-lg font-bold text-dark-900">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-500">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-dark-950 py-16">
+        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6">
+          <Star className="mx-auto mb-4 h-10 w-10 text-brand-400" />
+          <h2 className="text-2xl font-bold text-white md:text-3xl">جاهز لطلب سجادك أو مفروشاتك؟</h2>
+          <p className="mt-3 text-gray-400">تصفح تشكيلتنا الواسعة واطلب الآن مع التوصيل المجاني</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Link href="/products" className="btn-primary text-base px-8 py-3">
+              تسوق الآن
+              <ArrowLeft size={18} />
+            </Link>
+            <a
+              href={`https://wa.me/${store?.phones?.[0] || "9647729002266"}?text=مرحباً، أريد الاستفسار عن المنتجات`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary text-base px-8 py-3"
+            >
+              <Headphones size={18} />
+              تواصل معنا عبر واتساب
+            </a>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

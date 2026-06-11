@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class AdminCustomerService
 {
@@ -25,7 +26,16 @@ class AdminCustomerService
             });
         }
 
-        return $query->orderByDesc('created_at')->paginate($perPage);
+        $totalSpentSub = DB::table('orders')
+            ->selectRaw('coalesce(sum(total), 0)')
+            ->whereColumn('customer_id', 'customers.id')
+            ->where('status', '!=', 'cancelled');
+
+        return $query
+            ->withCount('orders')
+            ->selectSub($totalSpentSub, 'total_spent')
+            ->orderByDesc('created_at')
+            ->paginate($perPage);
     }
 
     public function findOrFail(string $id): Customer

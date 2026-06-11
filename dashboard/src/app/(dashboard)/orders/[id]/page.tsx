@@ -24,10 +24,12 @@ interface OrderDetail {
   discount?: number;
   items: {
     id: number;
+    product_id: number;
     name: string;
     price: number;
     quantity: number;
     subtotal: number;
+    options: Record<string, string> | null;
   }[];
   created_at: string;
 }
@@ -227,6 +229,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               <thead>
                 <tr>
                   <th>المنتج</th>
+                  <th>الخيارات</th>
                   <th>السعر</th>
                   <th>الكمية</th>
                   <th>المجموع</th>
@@ -236,6 +239,20 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 {order.items.map((item) => (
                   <tr key={item.id}>
                     <td className="font-medium text-gray-900">{item.name}</td>
+                    <td>
+                      {item.options && Object.keys(item.options).length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {Object.entries(item.options).map(([key, val]) => (
+                            <span key={key} className="inline-flex items-center gap-1 rounded-md bg-gray-50 px-2 py-0.5 text-xs text-gray-600">
+                              <span className="font-medium text-gray-400">{key}:</span>
+                              {val}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-300">—</span>
+                      )}
+                    </td>
                     <td className="text-gray-600">{formatPrice(item.price)}</td>
                     <td className="text-gray-600">{item.quantity}</td>
                     <td className="font-semibold text-gray-900">{formatPrice(item.subtotal)}</td>
