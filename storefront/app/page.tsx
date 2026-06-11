@@ -2,7 +2,7 @@ import { getBanners, getCategories, getProducts, getStoreSettings } from "@/lib/
 import { BannerCarousel } from "@/components/store/BannerCarousel";
 import { ProductCard } from "@/components/store/ProductCard";
 import Link from "next/link";
-import { ArrowLeft, Truck, ShieldCheck, Headphones, CreditCard, Star, Package } from "lucide-react";
+import { ArrowLeft, Truck, ShieldCheck, Headphones, Package } from "lucide-react";
 
 export default async function HomePage() {
   const [banners, categories, productsData, store] = await Promise.all([
@@ -17,31 +17,6 @@ export default async function HomePage() {
   return (
     <>
       <BannerCarousel banners={banners} />
-
-      {/* Features Strip */}
-      <section className="relative -mt-6 z-10 mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {[
-            { icon: Truck, title: "توصيل سريع", desc: "لجميع محافظات العراق", color: "text-blue-600", bg: "bg-blue-50" },
-            { icon: ShieldCheck, title: "جودة مضمونة", desc: "منتجات أصلية ١٠٠٪", color: "text-green-600", bg: "bg-green-50" },
-            { icon: Headphones, title: "دعم متواصل", desc: "خدمة عملاء يومياً", color: "text-purple-600", bg: "bg-purple-50" },
-            { icon: CreditCard, title: "دفع آمن", desc: "الدفع عند الاستلام", color: "text-amber-600", bg: "bg-amber-50" },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
-            >
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${item.bg}`}>
-                <item.icon className={`h-5 w-5 ${item.color}`} />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-dark-900">{item.title}</h3>
-                <p className="text-xs text-gray-500">{item.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* Categories */}
       {categories.length > 0 && (
@@ -175,30 +150,6 @@ export default async function HomePage() {
                 <p className="text-sm leading-relaxed text-gray-500">{item.desc}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-dark-950 py-16">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6">
-          <Star className="mx-auto mb-4 h-10 w-10 text-brand-400" />
-          <h2 className="text-2xl font-bold text-white md:text-3xl">جاهز لطلب سجادك أو مفروشاتك؟</h2>
-          <p className="mt-3 text-gray-400">تصفح تشكيلتنا الواسعة واطلب الآن مع التوصيل المجاني</p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="/products" className="btn-primary text-base px-8 py-3">
-              تسوق الآن
-              <ArrowLeft size={18} />
-            </Link>
-            <a
-              href={`https://wa.me/${store?.phones?.[0] || "9647729002266"}?text=مرحباً، أريد الاستفسار عن المنتجات`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary text-base px-8 py-3"
-            >
-              <Headphones size={18} />
-              تواصل معنا عبر واتساب
-            </a>
           </div>
         </div>
       </section>
