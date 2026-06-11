@@ -15,7 +15,7 @@ class AssetHelper
         }
 
         if (str_starts_with($path, '/')) {
-            return $path;
+            return url($path);
         }
 
         return asset('storage/'.$path);

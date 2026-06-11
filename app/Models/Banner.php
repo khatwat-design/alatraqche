@@ -63,12 +63,16 @@ class Banner extends Model implements HasMedia
 
     public function getImagePublicUrlAttribute(): string
     {
-        if ($this->image) {
-            return AssetHelper::publicUrl($this->image) ?? '';
-        }
         $media = $this->getFirstMedia('default');
         if ($media) {
+            $conversions = $media->getGeneratedConversions();
+            if ($conversions['large'] ?? false) {
+                return $media->getUrl('large');
+            }
             return $media->getUrl();
+        }
+        if ($this->image) {
+            return AssetHelper::publicUrl($this->image) ?? '';
         }
         return '';
     }

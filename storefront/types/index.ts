@@ -117,6 +117,8 @@ export interface CustomerInfo {
   name: string
   phone: string
   email: string | null
+  city: string | null
+  address: string | null
 }
 
 export interface OrderListItem {

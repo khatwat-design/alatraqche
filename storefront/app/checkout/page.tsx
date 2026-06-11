@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ShoppingBag, ArrowLeft, MapPin, Phone, User, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
-import { formatPrice, placeOrder, setStoredToken, IRAQI_CITIES, getStoredToken } from "@/lib/api";
+import { formatPrice, placeOrder, setStoredToken, IRAQI_CITIES, getStoredToken, getMe } from "@/lib/api";
 import { requestOtp, verifyOtpWithData } from "@/lib/auth";
 import type { SelectedOption } from "@/types";
 
@@ -52,6 +52,19 @@ export default function CheckoutPage() {
 
     if (token) {
       setAuthToken(token);
+      if (!phone) {
+        getMe().then((user) => {
+          if (user) {
+            setCustomer((prev) => ({
+              ...prev,
+              name: user.name || "",
+              phone: user.phone || "",
+              city: user.city || "",
+              address: user.address || "",
+            }));
+          }
+        });
+      }
     }
 
     if (coupon) {
