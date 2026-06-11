@@ -104,8 +104,9 @@ export default function BannersPage() {
       }
       setModalOpen(false);
       fetchBanners();
-    } catch {
-      toast.error(editing ? "فشل تحديث البانر" : "فشل إنشاء البانر");
+    } catch (e: unknown) {
+      const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message || (editing ? "فشل تحديث البانر" : "فشل إنشاء البانر");
+      toast.error(typeof msg === "string" ? msg : "فشل إنشاء البانر");
     } finally {
       setSaving(false);
     }
