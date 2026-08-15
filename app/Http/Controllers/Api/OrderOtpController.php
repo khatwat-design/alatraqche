@@ -6,6 +6,7 @@ use App\Helpers\PhoneHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Services\TwilioService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -117,20 +118,40 @@ class OrderOtpController extends Controller
             'customer_id' => $customer->id,
             'customer_name' => $orderData['customer']['name'],
             'customer_phone' => $customer->phone,
-            'city' => $orderData['customer']['city'],
-            'address' => $orderData['customer']['address'] ?? '',
+            'customer_city' => $orderData['customer']['city'],
+            'customer_address' => $orderData['customer']['address'] ?? '',
             'notes' => $orderData['customer']['notes'] ?? '',
             'subtotal' => (float) $orderData['summary']['subtotal'],
             'delivery_fee' => (float) ($orderData['summary']['deliveryFee'] ?? 0),
             'total' => (float) $orderData['summary']['total'],
-            'items' => $items,
-            'coupon_code' => $orderData['coupon'] ?? null,
+            'total_items' => array_sum(array_column($items, 'quantity')),
             'status' => 'pending',
             'channel' => 'storefront',
         ]);
 
         $order->invoice_id = 'ALQ-' . strtoupper(str()->random(8));
         $order->save();
+
+        $couponCode = $orderData['coupon'] ?? null;
+        if ($couponCode) {
+            $coupon = \App\Models\Coupon::where('code', $couponCode)->first();
+            if ($coupon) {
+                $order->coupon_id = $coupon->id;
+                $order->discount = (int) ($orderData['summary']['discount'] ?? 0);
+                $order->save();
+            }
+        }
+
+        foreach ($items as $item) {
+            OrderItem::query()->create([
+                'order_id' => $order->id,
+                'product_id' => $item['product_id'],
+                'name' => $item['product_name'],
+                'unit_price' => $item['price'],
+                'quantity' => $item['quantity'],
+                'subtotal' => $item['subtotal'],
+            ]);
+        }
 
         return response()->json([
             'ok' => true,

@@ -221,10 +221,14 @@ export default function UnifiedSettingsPage() {
           const isActive = tab === t.id;
           return (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-all ${
-                isActive ? "border-accent text-accent" : "border-transparent text-gray-500 hover:text-gray-700"
+              className={`flex shrink-0 items-center gap-2 border-b-2 px-5 py-3.5 text-sm font-medium transition-all duration-200 ${
+                isActive ? "border-accent text-accent bg-accent/5" : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               }`}>
-              <Icon className="h-4 w-4" />
+              <div className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200 ${
+                isActive ? "bg-accent/10 text-accent" : "bg-gray-100 text-gray-400"
+              }`}>
+                <Icon className="h-4 w-4" />
+              </div>
               {t.label}
             </button>
           );

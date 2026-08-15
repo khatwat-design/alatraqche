@@ -21,6 +21,8 @@ class StoreSetting extends Model implements HasMedia
         'header_background',
         'footer_background',
         'primary_color',
+        'delivery_fee',
+        'free_delivery_threshold',
         'address_line',
         'map_lat',
         'map_lng',

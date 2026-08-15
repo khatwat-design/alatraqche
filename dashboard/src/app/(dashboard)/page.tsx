@@ -182,7 +182,7 @@ export default function DashboardPage() {
               <Link
                 key={s.label}
                 href={s.href}
-                className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm transition-all hover:border-accent/30 hover:text-accent hover:shadow-md"
+                className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm transition-all duration-200 hover:border-accent/30 hover:text-accent hover:shadow-md hover:-translate-y-0.5"
               >
                 <Icon className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">{s.label}</span>
@@ -200,29 +200,32 @@ export default function DashboardPage() {
           const isPositive = change >= 0;
 
           return (
-            <div key={card.label} className="stat-card group relative overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5">
-              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-accent via-accent-hover to-accent opacity-60" />
-              <div className="mb-1 flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  {card.label}
-                </p>
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10 text-accent transition-all group-hover:bg-accent group-hover:text-white">
-                  <Icon className="h-4.5 w-4.5" />
+            <div key={card.label} className="stat-card group relative overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent via-accent-hover to-accent opacity-80" />
+              <div className="absolute -left-4 -top-4 h-24 w-24 rounded-full bg-accent/5 transition-all duration-300 group-hover:scale-150 group-hover:bg-accent/10" />
+              <div className="relative">
+                <div className="mb-1 flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    {card.label}
+                  </p>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent/10 to-accent/5 text-accent transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-accent group-hover:to-accent-hover group-hover:text-white group-hover:shadow-lg group-hover:shadow-accent/20">
+                    <Icon className="h-5 w-5" />
+                  </div>
                 </div>
-              </div>
-              <p className="text-2xl font-bold text-gray-900">
-                {card.format(card.value)}
-              </p>
-              <div className="mt-auto flex items-center gap-1.5 pt-2">
-                <span
-                  className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${
-                    isPositive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
-                  }`}
-                >
-                  {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                  {Math.abs(change).toFixed(1)}%
-                </span>
-                <span className="text-xs text-gray-400">مقارنة بالشهر الماضي</span>
+                <p className="text-2xl font-bold text-gray-900">
+                  {card.format(card.value)}
+                </p>
+                <div className="mt-auto flex items-center gap-1.5 pt-2">
+                  <span
+                    className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                      isPositive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+                    }`}
+                  >
+                    {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                    {Math.abs(change).toFixed(1)}%
+                  </span>
+                  <span className="text-xs text-gray-400">مقارنة بالشهر الماضي</span>
+                </div>
               </div>
             </div>
           );
@@ -235,17 +238,21 @@ export default function DashboardPage() {
         <div className="card lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-accent" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10">
+                <TrendingUp className="h-4 w-4 text-accent" />
+              </div>
               <h2 className="text-lg font-semibold text-gray-900">الإيرادات الشهرية</h2>
             </div>
-            <Link href="/analytics" className="flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover transition-colors">
+            <Link href="/analytics" className="flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover transition-colors duration-200">
               تفاصيل <ChevronLeft className="h-4 w-4" />
             </Link>
           </div>
           {chartData.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <BarChart3 className="mb-2 h-10 w-10 text-gray-300" />
-              <p className="text-sm text-gray-400">لا توجد بيانات إيرادات كافية</p>
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
+                <BarChart3 className="h-8 w-8 text-gray-300" />
+              </div>
+              <p className="mt-3 text-sm text-gray-400">لا توجد بيانات إيرادات كافية</p>
             </div>
           ) : (
             <div dir="ltr" className="h-64">
@@ -267,15 +274,16 @@ export default function DashboardPage() {
                     contentStyle={{
                       borderRadius: 12,
                       border: "1px solid #e5e7eb",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                       fontSize: 13,
+                      padding: "12px 16px",
                     }}
                     formatter={(value) => [formatPrice(Number(value)), "الإيرادات"]}
                     labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
                   />
                   <Bar
                     dataKey="revenue"
-                    radius={[6, 6, 0, 0]}
+                    radius={[8, 8, 0, 0]}
                     maxBarSize={48}
                     fill="url(#goldGradient)"
                   />
@@ -294,13 +302,17 @@ export default function DashboardPage() {
         {/* Status Distribution - Recharts PieChart */}
         <div className="card">
           <div className="mb-4 flex items-center gap-2">
-            <Package className="h-5 w-5 text-accent" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10">
+              <Package className="h-4 w-4 text-accent" />
+            </div>
             <h2 className="text-lg font-semibold text-gray-900">حالات الطلبات</h2>
           </div>
           {pieData.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <ShoppingCart className="mb-2 h-10 w-10 text-gray-300" />
-              <p className="text-sm text-gray-400">لا توجد طلبات</p>
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
+                <ShoppingCart className="h-8 w-8 text-gray-300" />
+              </div>
+              <p className="mt-3 text-sm text-gray-400">لا توجد طلبات</p>
             </div>
           ) : (
             <>
@@ -313,8 +325,9 @@ export default function DashboardPage() {
                       cy="50%"
                       innerRadius={50}
                       outerRadius={80}
-                      paddingAngle={3}
+                      paddingAngle={4}
                       dataKey="value"
+                      stroke="none"
                     >
                       {pieData.map((entry, i) => (
                         <Cell key={i} fill={entry.color} />
@@ -324,23 +337,25 @@ export default function DashboardPage() {
                       contentStyle={{
                         borderRadius: 12,
                         border: "1px solid #e5e7eb",
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                         fontSize: 13,
+                        padding: "12px 16px",
                       }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-2 space-y-1.5">
+              <div className="mt-3 space-y-2">
                 {pieData.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
+                  <div key={item.name} className="flex items-center justify-between rounded-lg px-2 py-1.5 transition-colors hover:bg-gray-50">
+                    <div className="flex items-center gap-2.5">
                       <span
-                        className="h-2.5 w-2.5 rounded-full"
+                        className="h-3 w-3 rounded-full shadow-sm"
                         style={{ backgroundColor: item.color }}
                       />
-                      <span className="text-gray-600">{item.name}</span>
+                      <span className="text-sm text-gray-600">{item.name}</span>
                     </div>
-                    <span className="font-semibold text-gray-900">{item.value}</span>
+                    <span className="text-sm font-bold text-gray-900">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -355,32 +370,42 @@ export default function DashboardPage() {
         <div className="card">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-accent" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10">
+                <Clock className="h-4 w-4 text-accent" />
+              </div>
               <h2 className="text-lg font-semibold text-gray-900">آخر الطلبات</h2>
             </div>
-            <Link href="/orders" className="flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover transition-colors">
+            <Link href="/orders" className="flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover transition-colors duration-200">
               عرض الكل <ChevronLeft className="h-4 w-4" />
             </Link>
           </div>
           {recentOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
-              <ShoppingCart className="mb-2 h-8 w-8 text-gray-300" />
-              <p className="text-sm text-gray-400">لا توجد طلبات حديثة</p>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
+                <ShoppingCart className="h-7 w-7 text-gray-300" />
+              </div>
+              <p className="mt-3 text-sm text-gray-400">لا توجد طلبات حديثة</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
-              {recentOrders.map((order) => (
+            <div className="space-y-1">
+              {recentOrders.map((order, idx) => (
                 <Link
                   key={order.id}
                   href={`/orders/${order.id}`}
-                  className="flex items-center justify-between py-2.5 transition-colors hover:bg-gray-50 -mx-1.5 px-1.5 rounded-lg"
+                  className="flex items-center justify-between rounded-xl p-3 transition-all duration-200 hover:bg-gradient-to-r hover:from-accent/5 hover:to-transparent hover:shadow-sm"
+                  style={{ animationDelay: `${idx * 50}ms` }}
                 >
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">#{order.invoice_id}</p>
-                    <p className="text-xs text-gray-500">{order.customer_name}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-xs font-bold text-gray-600">
+                      #{order.invoice_id.slice(-3)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">#{order.invoice_id}</p>
+                      <p className="text-xs text-gray-500">{order.customer_name}</p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-900">{formatPrice(order.total)}</span>
+                    <span className="text-sm font-bold text-gray-900">{formatPrice(order.total)}</span>
                     <span className={`badge ${statusMap[order.status]?.badge || "badge-yellow"}`}>
                       {statusMap[order.status]?.label || order.status}
                     </span>
@@ -393,16 +418,16 @@ export default function DashboardPage() {
 
         {/* Summary + Quick Stats */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="card-static flex flex-col items-center justify-center text-center transition-all hover:shadow-md hover:-translate-y-0.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
-              <ShoppingCart className="h-5 w-5 text-green-600" />
+          <div className="card-static group flex flex-col items-center justify-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-green-50 to-green-100 text-green-600 transition-all duration-300 group-hover:scale-110 group-hover:shadow-md group-hover:shadow-green-100">
+              <ShoppingCart className="h-6 w-6" />
             </div>
             <p className="mt-3 text-2xl font-bold text-gray-900">{allOrders.length}</p>
             <p className="text-xs text-gray-500">إجمالي الطلبات</p>
           </div>
-          <div className="card-static flex flex-col items-center justify-center text-center transition-all hover:shadow-md hover:-translate-y-0.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50">
-              <svg className="h-5 w-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="card-static group flex flex-col items-center justify-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-50 to-red-100 text-red-600 transition-all duration-300 group-hover:scale-110 group-hover:shadow-md group-hover:shadow-red-100">
+              <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -410,38 +435,38 @@ export default function DashboardPage() {
             <p className="mt-3 text-2xl font-bold text-gray-900">{statusCounts["cancelled"] || 0}</p>
             <p className="text-xs text-gray-500">طلبات ملغية</p>
           </div>
-          <div className="card-static flex flex-col items-center justify-center text-center transition-all hover:shadow-md hover:-translate-y-0.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
+          <div className="card-static group flex flex-col items-center justify-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 transition-all duration-300 group-hover:scale-110 group-hover:shadow-md group-hover:shadow-blue-100">
+              <TrendingUp className="h-6 w-6" />
             </div>
             <p className="mt-3 text-2xl font-bold text-gray-900">{activeOrders.length}</p>
             <p className="text-xs text-gray-500">طلبات نشطة</p>
           </div>
-          <div className="card-static flex flex-col items-center justify-center text-center transition-all hover:shadow-md hover:-translate-y-0.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50">
-              <DollarSign className="h-5 w-5 text-purple-600" />
+          <div className="card-static group flex flex-col items-center justify-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 transition-all duration-300 group-hover:scale-110 group-hover:shadow-md group-hover:shadow-purple-100">
+              <DollarSign className="h-6 w-6" />
             </div>
             <p className="mt-3 text-lg font-bold text-gray-900">{formatPrice(avgOrder)}</p>
             <p className="text-xs text-gray-500">متوسط الطلب</p>
           </div>
 
           {/* Quick Access Card */}
-          <div className="card-static col-span-2 flex flex-col justify-center transition-all hover:shadow-md">
+          <div className="card-static col-span-2 flex flex-col justify-center transition-all duration-300 hover:shadow-lg">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">وصول سريع</p>
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/products" className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-accent/20 hover:bg-accent/5 hover:text-accent">
+              <Link href="/products" className="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-accent/30 hover:bg-accent/5 hover:text-accent hover:shadow-sm hover:-translate-y-0.5">
                 <Package className="h-4 w-4" />
                 المنتجات
               </Link>
-              <Link href="/orders" className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-accent/20 hover:bg-accent/5 hover:text-accent">
+              <Link href="/orders" className="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-accent/30 hover:bg-accent/5 hover:text-accent hover:shadow-sm hover:-translate-y-0.5">
                 <ShoppingCart className="h-4 w-4" />
                 الطلبات
               </Link>
-              <Link href="/customers" className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-accent/20 hover:bg-accent/5 hover:text-accent">
+              <Link href="/customers" className="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-accent/30 hover:bg-accent/5 hover:text-accent hover:shadow-sm hover:-translate-y-0.5">
                 <Users className="h-4 w-4" />
                 العملاء
               </Link>
-              <Link href="/analytics" className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-accent/20 hover:bg-accent/5 hover:text-accent">
+              <Link href="/analytics" className="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-accent/30 hover:bg-accent/5 hover:text-accent hover:shadow-sm hover:-translate-y-0.5">
                 <BarChart3 className="h-4 w-4" />
                 التحليلات
               </Link>

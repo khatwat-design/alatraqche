@@ -5,17 +5,35 @@ import Link from "next/link";
 import { Search, Eye, Filter, CheckSquare, Download, ChevronDown, XSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import api from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
+import { exportToExcel, exportToCSV, exportToJSON } from "@/lib/export";
 import toast from "react-hot-toast";
+
+interface OrderItem {
+  id: number;
+  product_id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  subtotal: number;
+  options?: Record<string, string> | null;
+}
 
 interface Order {
   id: number;
   invoice_id: string;
   customer_name: string;
   total: number;
+  subtotal: number;
+  delivery_fee: number;
+  discount: number;
   status: string;
   payment_status: string;
+  payment_method: string;
   created_at: string;
   customer_phone?: string;
+  customer_city?: string;
+  notes?: string;
+  items: OrderItem[];
 }
 
 interface Meta {
@@ -41,6 +59,7 @@ export default function OrdersPage() {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [exportOpen, setExportOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -117,36 +136,70 @@ export default function OrdersPage() {
     }
   };
 
-  const handleExport = (format: "csv" | "json") => {
-    const data = filtered.map((o) => ({
-      invoice_id: o.invoice_id,
-      customer: o.customer_name,
-      phone: o.customer_phone,
-      total: o.total,
-      status: statusMap[o.status]?.label || o.status,
-      payment: o.payment_status,
-      date: new Date(o.created_at).toLocaleDateString("ar-IQ"),
-    }));
+  const handleExport = (format: "csv" | "json" | "xlsx") => {
+    const date = new Date().toISOString().slice(0, 10);
+    const baseName = `orders-${date}`;
 
-    if (format === "csv") {
-      const headers = ["رقم الفاتورة", "العميل", "الهاتف", "المبلغ", "الحالة", "الدفع", "التاريخ"];
-      const rows = data.map((r) => [r.invoice_id, r.customer, r.phone, r.total, r.status, r.payment, r.date].join(","));
-      const csv = [headers.join(","), ...rows].join("\n");
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } else {
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+    const source = selectedIds.size > 0
+      ? filtered.filter((o) => selectedIds.has(o.id))
+      : filtered;
+
+    const exportData = source.flatMap((o) => {
+      if (o.items && o.items.length > 0) {
+        return o.items.map((item, idx) => ({
+          "رقم الفاتورة": idx === 0 ? o.invoice_id : "",
+          "العميل": idx === 0 ? o.customer_name : "",
+          "الهاتف": idx === 0 ? (o.customer_phone || "") : "",
+          "المدينة": idx === 0 ? (o.customer_city || "") : "",
+          "اسم المنتج": item.name,
+          "رقم المنتج": item.product_id || "",
+          "الكمية": item.quantity,
+          "سعر الوحدة": item.price,
+          "المبلغ الفرعي": item.subtotal,
+          "الخصم": idx === 0 ? o.discount : "",
+          "رسوم التوصيل": idx === 0 ? o.delivery_fee : "",
+          "الإجمالي": idx === 0 ? o.total : "",
+          "الحالة": idx === 0 ? (statusMap[o.status]?.label || o.status) : "",
+          "طريقة الدفع": idx === 0 ? (o.payment_method === "cod" ? "الدفع عند الاستلام" : o.payment_method === "online" ? "أونلاين" : o.payment_method || "") : "",
+          "الدفع": idx === 0 ? (o.payment_status === "paid" ? "مدفوع" : "غير مدفوع") : "",
+          "ملاحظات": idx === 0 ? (o.notes || "") : "",
+          "التاريخ": idx === 0 ? new Date(o.created_at).toLocaleDateString("ar-IQ") : "",
+        }));
+      }
+      return [{
+        "رقم الفاتورة": o.invoice_id,
+        "العميل": o.customer_name,
+        "الهاتف": o.customer_phone || "",
+        "المدينة": o.customer_city || "",
+        "اسم المنتج": "—",
+        "رقم المنتج": "",
+        "الكمية": 0,
+        "سعر الوحدة": 0,
+        "المبلغ الفرعي": 0,
+        "الخصم": o.discount,
+        "رسوم التوصيل": o.delivery_fee,
+        "الإجمالي": o.total,
+        "الحالة": statusMap[o.status]?.label || o.status,
+        "طريقة الدفع": o.payment_method === "cod" ? "الدفع عند الاستلام" : o.payment_method === "online" ? "أونلاين" : o.payment_method || "",
+        "الدفع": o.payment_status === "paid" ? "مدفوع" : "غير مدفوع",
+        "ملاحظات": o.notes || "",
+        "التاريخ": new Date(o.created_at).toLocaleDateString("ar-IQ"),
+      }];
+    });
+
+    if (exportData.length === 0) {
+      toast.error("لا توجد طلبات للتصدير");
+      return;
     }
-    toast.success(`تم تصدير ${data.length} طلب بصيغة ${format.toUpperCase()}`);
+
+    if (format === "xlsx") {
+      exportToExcel(exportData, baseName, "الطلبات");
+    } else if (format === "csv") {
+      exportToCSV(exportData, baseName, Object.keys(exportData[0]));
+    } else {
+      exportToJSON(exportData, baseName);
+    }
+    toast.success(`تم تصدير ${exportData.length} طلب بصيغة ${format.toUpperCase()}`);
   };
 
   return (
@@ -159,20 +212,31 @@ export default function OrdersPage() {
         </div>
         <div className="flex items-center gap-3">
           {/* Export Dropdown */}
-          <div className="relative group">
-            <button className="btn-secondary text-sm">
+          <div className="relative">
+            <button onClick={() => setExportOpen(!exportOpen)} className="btn-secondary text-sm">
               <Download className="h-4 w-4" />
               تصدير
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className={`h-3 w-3 transition-transform ${exportOpen ? "rotate-180" : ""}`} />
             </button>
-            <div className="absolute left-0 top-full z-20 mt-1 hidden w-36 animate-fade-in overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl group-hover:block">
-              <button onClick={() => handleExport("csv")} className="block w-full px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-gray-50">
-                CSV
-              </button>
-              <button onClick={() => handleExport("json")} className="block w-full px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-gray-50">
-                JSON
-              </button>
-            </div>
+            {exportOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setExportOpen(false)} />
+                <div className="absolute left-0 top-full z-20 mt-1 w-40 animate-scale-in overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
+                  <button onClick={() => { handleExport("xlsx"); setExportOpen(false); }} className="flex w-full items-center gap-2 px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-accent/5 hover:text-accent">
+                    <span className="inline-block rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-bold text-green-700">XLSX</span>
+                    Excel
+                  </button>
+                  <button onClick={() => { handleExport("csv"); setExportOpen(false); }} className="flex w-full items-center gap-2 px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-gray-50">
+                    <span className="inline-block rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">CSV</span>
+                    CSV
+                  </button>
+                  <button onClick={() => { handleExport("json"); setExportOpen(false); }} className="flex w-full items-center gap-2 px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-gray-50">
+                    <span className="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-600">JSON</span>
+                    JSON
+                  </button>
+                </div>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-400">
             إجمالي <span className="font-semibold text-gray-900">{filtered.length}</span>
@@ -250,7 +314,7 @@ export default function OrdersPage() {
       )}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="h-8 w-8 animate-spin rounded-full border-3 border-gray-200 border-t-accent" />
@@ -264,73 +328,115 @@ export default function OrdersPage() {
             {search && <p className="mt-1 text-xs text-gray-400">حاول تغيير معايير البحث</p>}
           </div>
         ) : (
-          <table className="table-base">
-            <thead>
-              <tr>
-                <th className="w-10">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.size === filtered.length && filtered.length > 0}
-                    onChange={toggleSelectAll}
-                    className="h-4 w-4 rounded border-gray-300 text-accent accent-accent"
-                  />
-                </th>
-                <th>الفاتورة</th>
-                <th>العميل</th>
-                <th>المبلغ</th>
-                <th>الحالة</th>
-                <th>الدفع</th>
-                <th>التاريخ</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
+          <>
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="table-base">
+                <thead>
+                  <tr>
+                    <th className="w-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.size === filtered.length && filtered.length > 0}
+                        onChange={toggleSelectAll}
+                        className="h-4 w-4 rounded border-gray-300 text-accent accent-accent"
+                      />
+                    </th>
+                    <th>الفاتورة</th>
+                    <th>العميل</th>
+                    <th>المبلغ</th>
+                    <th>الحالة</th>
+                    <th>الدفع</th>
+                    <th>التاريخ</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {filtered.map((order) => (
+                    <tr key={order.id} className={`${selectedIds.has(order.id) ? "bg-accent-subtle" : ""}`}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(order.id)}
+                          onChange={() => toggleSelect(order.id)}
+                          className="h-4 w-4 rounded border-gray-300 text-accent accent-accent"
+                        />
+                      </td>
+                      <td>
+                        <span className="font-medium text-gray-900">#{order.invoice_id}</span>
+                      </td>
+                      <td>
+                        <div>
+                          <span className="text-gray-900">{order.customer_name}</span>
+                          {order.customer_phone && (
+                            <span className="mr-2 text-xs text-gray-400" dir="ltr">{order.customer_phone}</span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <span className="font-semibold text-gray-900">{formatPrice(order.total)}</span>
+                      </td>
+                      <td>
+                        <span className={`badge ${statusMap[order.status]?.badge || "badge-yellow"}`}>
+                          {statusMap[order.status]?.label || order.status}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`badge ${order.payment_status === "paid" ? "badge-green" : "badge-yellow"}`}>
+                          {order.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
+                        </span>
+                      </td>
+                      <td className="text-gray-500">
+                        {new Date(order.created_at).toLocaleDateString("ar-IQ")}
+                      </td>
+                      <td>
+                        <Link href={`/orders/${order.id}`} className="btn-ghost p-1.5 text-gray-400 hover:text-accent">
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="block md:hidden space-y-3 p-4">
               {filtered.map((order) => (
-                <tr key={order.id} className={`${selectedIds.has(order.id) ? "bg-accent-subtle" : ""}`}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.has(order.id)}
-                      onChange={() => toggleSelect(order.id)}
-                      className="h-4 w-4 rounded border-gray-300 text-accent accent-accent"
-                    />
-                  </td>
-                  <td>
-                    <span className="font-medium text-gray-900">#{order.invoice_id}</span>
-                  </td>
-                  <td>
-                    <div>
-                      <span className="text-gray-900">{order.customer_name}</span>
-                      {order.customer_phone && (
-                        <span className="mr-2 text-xs text-gray-400" dir="ltr">{order.customer_phone}</span>
-                      )}
+                <Link key={order.id} href={`/orders/${order.id}`} className="block rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-accent/10 to-accent/5 text-xs font-bold text-accent">
+                        #{order.invoice_id.slice(-3)}
+                      </div>
+                      <div>
+                        <span className="font-bold text-gray-900">#{order.invoice_id}</span>
+                        <p className="text-sm text-gray-600 mt-0.5">{order.customer_name}</p>
+                        {order.customer_phone && (
+                          <p className="text-xs text-gray-400 mt-0.5" dir="ltr">{order.customer_phone}</p>
+                        )}
+                      </div>
                     </div>
-                  </td>
-                  <td>
-                    <span className="font-semibold text-gray-900">{formatPrice(order.total)}</span>
-                  </td>
-                  <td>
                     <span className={`badge ${statusMap[order.status]?.badge || "badge-yellow"}`}>
                       {statusMap[order.status]?.label || order.status}
                     </span>
-                  </td>
-                  <td>
-                    <span className={`badge ${order.payment_status === "paid" ? "badge-green" : "badge-yellow"}`}>
-                      {order.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
-                    </span>
-                  </td>
-                  <td className="text-gray-500">
-                    {new Date(order.created_at).toLocaleDateString("ar-IQ")}
-                  </td>
-                  <td>
-                    <Link href={`/orders/${order.id}`} className="btn-ghost p-1.5 text-gray-400 hover:text-accent">
-                      <Eye className="h-4 w-4" />
-                    </Link>
-                  </td>
-                </tr>
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-gray-900">{formatPrice(order.total)}</span>
+                      <span className={`badge text-[10px] ${order.payment_status === "paid" ? "badge-green" : "badge-yellow"}`}>
+                        {order.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                      <Eye className="h-3.5 w-3.5" />
+                      {new Date(order.created_at).toLocaleDateString("ar-IQ")}
+                    </div>
+                  </div>
+                </Link>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
 
         {/* Pagination */}

@@ -1,0 +1,33 @@
+# الأطرقجي للسجاد والأثاث والمفروشات - إعدادات البيئة
+# انسخ هذا الملف إلى .env.local وعدّل القيم
+
+# عنوان الموقع (للميتا وروابط المشاركة)
+NEXT_PUBLIC_SITE_URL=https://your-store-domain.com
+
+# Telegram Bot - إشعارات الطلبات
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+TELEGRAM_CHANNEL_ID=your_channel_id_here
+
+# Google Sheets - حفظ الطلبات عبر Google Apps Script
+GOOGLE_APPS_SCRIPT_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
+
+# Google Analytics (اختياري)
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+
+# Facebook / Meta Pixel (اختياري)
+NEXT_PUBLIC_META_PIXEL_ID=your_meta_pixel_id
+
+# TikTok Pixel (اختياري) — نفس الأحداث تُطلق مع Meta
+NEXT_PUBLIC_TIKTOK_PIXEL_ID=your_tiktok_pixel_id
+
+# خرائط Google — تضمين iframe (اختياري): انسخ رابط src من «مشاركة > تضمين خريطة» في Google Maps
+# إن لم تُضبط، يُستخدم موقع تقريبي قرب مستشفى الكندي (شارع فلسطين، بغداد)
+# NEXT_PUBLIC_GOOGLE_MAPS_EMBED_URL=https://www.google.com/maps/embed?pb=...
+
+# لوحة Laravel (Filament) — عند التعيين يُجلب الكتالوج وإعدادات المتجر والبنرات وتُسجَّل الطلبات عبر API
+# مثال محلي: STORE_API_BASE_URL=http://127.0.0.1:8000/api/v1
+# STORE_API_BASE_URL=
+
+# نسخة مستقرة مؤقتة (تيليغرام + Google Sheets فقط، بدون تسجيل/لوحة) — انسخ `.env.standalone.example` إلى `.env.local`
+# أو شغّل: npm run dev:standalone
+# NEXT_PUBLIC_STORE_STANDALONE=true

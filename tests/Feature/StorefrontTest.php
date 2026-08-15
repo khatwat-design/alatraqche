@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\StoreSetting;
@@ -115,23 +114,11 @@ class StorefrontTest extends TestCase
         $response->assertNotFound();
     }
 
-    public function test_banners_returns_only_active()
-    {
-        Banner::factory()->create(['is_active' => true, 'sort_order' => 1]);
-        Banner::factory()->create(['is_active' => false]);
-
-        $response = $this->getJson('/api/v1/banners');
-
-        $response->assertOk();
-        $this->assertCount(1, $response->json());
-    }
-
     public function test_public_endpoints_have_no_auth()
     {
         $this->getJson('/api/v1/store')->assertOk();
         $this->getJson('/api/v1/categories')->assertOk();
         $this->getJson('/api/v1/products')->assertOk();
-        $this->getJson('/api/v1/banners')->assertOk();
     }
 
     public function test_products_search_by_name()

@@ -24,7 +24,6 @@ const searchPages = [
   { label: "المنتجات", href: "/products", icon: "products", keywords: ["منتج", "منتجات", "سلعة", "product"] },
   { label: "الطلبات", href: "/orders", icon: "orders", keywords: ["طلب", "طلبات", "فاتورة", "order", "invoice"] },
   { label: "العملاء", href: "/customers", icon: "customers", keywords: ["عميل", "عملاء", "زبون", "customer"] },
-  { label: "البنرات", href: "/banners", icon: "banners", keywords: ["بانر", "بنرات", "اعلان", "banner"] },
   { label: "المتجر", href: "/stores", icon: "stores", keywords: ["متجر", "اعدادات", "store", "settings"] },
   { label: "الإعدادات", href: "/settings", icon: "settings", keywords: ["اعدادات", "ملف", "profile", "password"] },
   { label: "تحليلات", href: "/analytics", icon: "analytics", keywords: ["تحليل", "احصائيات", "charts", "analytics"] },
@@ -35,7 +34,6 @@ const searchIconMap: Record<string, React.ReactNode> = {
   products: <Package className="h-4 w-4" />,
   orders: <ShoppingCart className="h-4 w-4" />,
   customers: <Users className="h-4 w-4" />,
-  banners: <Tags className="h-4 w-4" />,
   stores: <Settings className="h-4 w-4" />,
   settings: <Settings className="h-4 w-4" />,
   analytics: <LayoutDashboard className="h-4 w-4" />,
@@ -55,7 +53,7 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const notifRef = useRef<HTMLDivElement>(null);
   const sseRef = useRef<EventSource | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+  const apiBase = typeof window !== "undefined" ? "https://dashbord.alatraqchy.com/api/v1" : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1");
 
   useEffect(() => {
     if (!searchQuery.trim()) { setSearchResults([]); return; }

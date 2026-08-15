@@ -145,59 +145,95 @@ export default function CategoriesPage() {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="table-base">
-              <thead>
-                <tr>
-                  <th>التصنيف</th>
-                  <th>المنتجات</th>
-                  <th>الترتيب</th>
-                  <th className="text-left">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {filtered.map((cat) => (
-                  <tr key={cat.id}>
-                    <td>
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent/10 text-sm font-bold text-accent">
-                          {cat.image ? (
-                            <img src={cat.image} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            cat.name.charAt(0)
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900">{cat.name}</p>
-                          {cat.description && (
-                            <p className="truncate text-xs text-gray-400 max-w-[200px]">{cat.description}</p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="text-sm font-medium text-gray-700">{cat.products_count ?? 0}</span>
-                    </td>
-                    <td>
-                      <span className="text-sm text-gray-500">{cat.sort_order ?? "—"}</span>
-                    </td>
-                    <td>
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(cat)}
-                          className="btn-ghost p-1.5 text-gray-400 hover:text-blue-600" title="تعديل">
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button onClick={() => setDeleteConfirm(cat.id)}
-                          className="btn-ghost p-1.5 text-gray-400 hover:text-red-600" title="حذف">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="table-base">
+                <thead>
+                  <tr>
+                    <th>التصنيف</th>
+                    <th>المنتجات</th>
+                    <th>الترتيب</th>
+                    <th className="text-left">الإجراءات</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {filtered.map((cat) => (
+                    <tr key={cat.id}>
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent/10 text-sm font-bold text-accent">
+                            {cat.image ? (
+                              <img src={cat.image} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              cat.name.charAt(0)
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-900">{cat.name}</p>
+                            {cat.description && (
+                              <p className="truncate text-xs text-gray-400 max-w-[200px]">{cat.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="text-sm font-medium text-gray-700">{cat.products_count ?? 0}</span>
+                      </td>
+                      <td>
+                        <span className="text-sm text-gray-500">{cat.sort_order ?? "—"}</span>
+                      </td>
+                      <td>
+                        <div className="flex items-center justify-end gap-1">
+                          <button onClick={() => openEdit(cat)}
+                            className="btn-ghost p-1.5 text-gray-400 hover:text-blue-600" title="تعديل">
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button onClick={() => setDeleteConfirm(cat.id)}
+                            className="btn-ghost p-1.5 text-gray-400 hover:text-red-600" title="حذف">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="block md:hidden space-y-3">
+              {filtered.map((cat) => (
+                <div key={cat.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-accent/10 text-lg font-bold text-accent">
+                      {cat.image ? (
+                        <img src={cat.image} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        cat.name.charAt(0)
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-gray-900">{cat.name}</p>
+                      {cat.description && <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{cat.description}</p>}
+                      <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+                        <span>المنتجات: {cat.products_count ?? 0}</span>
+                        <span>الترتيب: {cat.sort_order ?? "—"}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-1 mt-3 pt-3 border-t border-gray-50">
+                    <button onClick={() => openEdit(cat)} className="btn-ghost p-1.5 text-blue-600" title="تعديل">
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => setDeleteConfirm(cat.id)} className="btn-ghost p-1.5 text-red-600" title="حذف">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

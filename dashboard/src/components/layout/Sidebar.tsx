@@ -10,7 +10,6 @@ import {
   Users,
   BarChart3,
   Store,
-  Image as ImageIcon,
   Settings,
   LogOut,
   ChevronLeft,
@@ -20,13 +19,19 @@ import {
 import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 
-const navItems = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  group?: string;
+}
+
+const navItems: NavItem[] = [
   { href: "/", label: "لوحة التحكم", icon: LayoutDashboard },
-  { href: "/products", label: "المنتجات", icon: Package },
-  { href: "/categories", label: "التصنيفات", icon: Tags },
   { href: "/orders", label: "الطلبات", icon: ShoppingCart },
   { href: "/customers", label: "العملاء", icon: Users },
-  { href: "/banners", label: "البنرات", icon: ImageIcon },
+  { href: "/products", label: "المنتجات", icon: Package },
+  { href: "/categories", label: "التصنيفات", icon: Tags },
   { href: "/analytics", label: "التحليلات", icon: BarChart3 },
   { href: "/settings", label: "الإعدادات", icon: Settings },
 ];

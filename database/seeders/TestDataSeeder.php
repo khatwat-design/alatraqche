@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Coupon;
 use App\Models\Customer;
@@ -24,7 +23,6 @@ class TestDataSeeder extends Seeder
         $this->createCategories();
         $this->createProductsWithOptions();
         $this->createCoupons();
-        $this->createBanners();
         $this->createOrders();
 
         $this->command?->info('✅ تم إنشاء جميع بيانات الاختبار بنجاح!');
@@ -280,56 +278,6 @@ class TestDataSeeder extends Seeder
         Coupon::query()->where('code', 'MAXEDOUT')->update(['used_count' => 3]);
 
         $this->command?->info('✓ ' . count($coupons) . ' كوبون خصم');
-    }
-
-    private function createBanners(): void
-    {
-        if (Banner::query()->exists()) {
-            $this->command?->warn('  البنرات موجودة مسبقاً، يتم تخطيها...');
-            return;
-        }
-
-        $images = [
-            'https://images.unsplash.com/photo-1600166898405-da9535204843?w=1200&h=400&fit=crop',
-            'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&h=400&fit=crop',
-            'https://images.unsplash.com/photo-1522771739019-7c73f3f3121f?w=1200&h=400&fit=crop',
-            'https://images.unsplash.com/photo-1606741965425-5e7cd18e4ca1?w=1200&h=400&fit=crop',
-        ];
-
-        $banners = [
-            [
-                'title' => 'تخفيضات كبرى على السجاد',
-                'link_url' => '/products?category=carpets',
-                'sort_order' => 0,
-            ],
-            [
-                'title' => 'أثاث عصري بتصاميم جديدة',
-                'link_url' => '/products?category=furniture',
-                'sort_order' => 1,
-            ],
-            [
-                'title' => 'المراتب الطبية — جودة ونوم هاني',
-                'link_url' => '/products?category=mattresses',
-                'sort_order' => 2,
-            ],
-            [
-                'title' => 'استعد للصيف مع مستلزمات الحديقة',
-                'link_url' => '/products?category=garden',
-                'sort_order' => 3,
-            ],
-        ];
-
-        foreach ($banners as $i => $b) {
-            Banner::query()->create([
-                'title' => $b['title'],
-                'image' => $images[$i] ?? null,
-                'link_url' => $b['link_url'],
-                'sort_order' => $b['sort_order'],
-                'is_active' => true,
-            ]);
-        }
-
-        $this->command?->info('✓ ' . count($banners) . ' بنر');
     }
 
     private function createOrders(): void

@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Api\AdminAuthController;
-use App\Http\Controllers\Api\AdminBannerController;
 use App\Http\Controllers\Api\AdminCategoryController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdminCouponController;
@@ -29,7 +28,6 @@ Route::prefix('v1')->group(function () {
     Route::get('/categories', [StorefrontController::class, 'categories']);
     Route::get('/products/{id}', [StorefrontController::class, 'product']);
     Route::get('/products', [StorefrontController::class, 'products']);
-    Route::get('/banners', [StorefrontController::class, 'banners']);
     Route::get('/events', [\App\Http\Controllers\Api\StoreEventsController::class, 'stream']);
     Route::get('/store-status', [\App\Http\Controllers\Api\StoreEventsController::class, 'status']);
     Route::get('/notifications/stream', [AdminNotificationController::class, 'stream']);
@@ -100,12 +98,6 @@ Route::prefix('v1')->group(function () {
             Route::post('/admin/categories', [AdminCategoryController::class, 'store']);
             Route::put('/admin/categories/{id}', [AdminCategoryController::class, 'update']);
             Route::delete('/admin/categories/{id}', [AdminCategoryController::class, 'destroy']);
-
-            Route::get('/admin/banners', [AdminBannerController::class, 'index']);
-            Route::get('/admin/banners/{id}', [AdminBannerController::class, 'show']);
-            Route::post('/admin/banners', [AdminBannerController::class, 'store']);
-            Route::put('/admin/banners/{id}', [AdminBannerController::class, 'update']);
-            Route::delete('/admin/banners/{id}', [AdminBannerController::class, 'destroy']);
 
             Route::get('/notifications', [AdminNotificationController::class, 'index']);
             Route::get('/notifications/unread-count', [AdminNotificationController::class, 'unreadCount']);

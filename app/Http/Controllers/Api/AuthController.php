@@ -100,7 +100,7 @@ class AuthController extends Controller
         if (! $customer) {
             $customer = Customer::query()->create([
                 'phone' => $phone,
-                'name' => $data['name'] ?? null,
+                'name' => $data['name'] ?? 'عميل',
                 'city' => $data['city'] ?? null,
                 'address' => $data['address'] ?? null,
                 'phone_verified_at' => now(),

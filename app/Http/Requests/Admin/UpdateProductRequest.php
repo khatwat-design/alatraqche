@@ -22,6 +22,10 @@ class UpdateProductRequest extends FormRequest
             'badge' => 'nullable|string|max:64',
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'primary_image' => 'nullable|integer|min:0',
         ];
     }
 

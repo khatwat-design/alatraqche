@@ -225,17 +225,19 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               </div>
               <h2 className="text-lg font-semibold text-gray-900">المنتجات</h2>
             </div>
-            <table className="table-base">
-              <thead>
-                <tr>
-                  <th>المنتج</th>
-                  <th>الخيارات</th>
-                  <th>السعر</th>
-                  <th>الكمية</th>
-                  <th>المجموع</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="table-base">
+                <thead>
+                  <tr>
+                    <th>المنتج</th>
+                    <th>الخيارات</th>
+                    <th>السعر</th>
+                    <th>الكمية</th>
+                    <th>المجموع</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
                 {order.items.map((item) => (
                   <tr key={item.id}>
                     <td className="font-medium text-gray-900">{item.name}</td>
@@ -260,6 +262,33 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 ))}
               </tbody>
             </table>
+          </div>
+
+            {/* Mobile cards */}
+            <div className="block md:hidden space-y-3">
+              {order.items.map((item) => (
+                <div key={item.id} className="rounded-xl border border-gray-50 bg-gray-50/50 p-3">
+                  <div className="flex items-start justify-between mb-2">
+                    <p className="font-medium text-gray-900">{item.name}</p>
+                    <span className="font-bold text-gray-900">{formatPrice(item.subtotal)}</span>
+                  </div>
+                  {item.options && Object.keys(item.options).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {Object.entries(item.options).map(([key, val]) => (
+                        <span key={key} className="inline-flex items-center gap-1 rounded-md bg-white px-2 py-0.5 text-xs text-gray-600">
+                          <span className="font-medium text-gray-400">{key}:</span>
+                          {val}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 text-sm text-gray-500">
+                    <span>السعر: {formatPrice(item.price)}</span>
+                    <span>الكمية: {item.quantity}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

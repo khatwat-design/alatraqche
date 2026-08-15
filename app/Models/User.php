@@ -54,7 +54,7 @@ class User extends Authenticatable implements FilamentUser
     {
         return match ($this->role) {
             'admin' => true,
-            'manager' => in_array($permission, ['products', 'orders', 'customers', 'categories', 'coupons', 'banners']),
+            'manager' => in_array($permission, ['products', 'orders', 'customers', 'categories', 'coupons']),
             'editor' => in_array($permission, ['products', 'categories']),
             'viewer' => false,
             default => false,

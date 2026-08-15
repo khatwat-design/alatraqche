@@ -41,15 +41,19 @@ function Stepper({ steps, current }: { steps: string[]; current: number }) {
     <div className="flex items-center gap-2 overflow-x-auto px-6 py-4">
       {steps.map((label, i) => (
         <div key={i} className="flex shrink-0 items-center gap-2">
-          <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
-            i <= current ? "bg-accent text-white" : "bg-gray-100 text-gray-400"
+          <div className={`step-circle ${
+            i < current ? "step-completed" : i === current ? "step-active" : "step-pending"
           }`}>
-            {i < current ? <Check className="h-3.5 w-3.5" /> : i + 1}
+            {i < current ? <Check className="h-4 w-4" /> : i + 1}
           </div>
-          <span className={`text-xs font-medium ${i <= current ? "text-accent" : "text-gray-400"}`}>
+          <span className={`text-xs font-semibold ${i <= current ? "text-gray-900" : "text-gray-400"}`}>
             {label}
           </span>
-          {i < steps.length - 1 && <div className={`h-px w-6 sm:w-8 ${i < current ? "bg-accent" : "bg-gray-200"}`} />}
+          {i < steps.length - 1 && (
+            <div className={`h-px w-8 transition-colors duration-300 ${
+              i < current ? "bg-gradient-to-r from-success to-success" : "bg-gray-200"
+            }`} />
+          )}
         </div>
       ))}
     </div>
@@ -316,83 +320,146 @@ export default function ProductsPage() {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="table-base">
-              <thead>
-                <tr>
-                  <th>المنتج</th>
-                  <th>السعر</th>
-                  <th>المخزون</th>
-                  <th>التصنيف</th>
-                  <th>الحالة</th>
-                  <th className="text-left">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {filtered.map((product) => (
-                  <tr key={product.id}>
-                    <td>
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent/10 text-sm font-bold text-accent">
-                          {product.image ? (
-                            <img src={product.image} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            product.name.charAt(0)
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-gray-900">{product.name}</p>
-                          {product.badge && (
-                            <span className="mt-0.5 inline-block rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">
-                              {product.badge}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td><span className="font-semibold text-gray-900">{formatPrice(product.price)}</span></td>
-                    <td>
-                      <span className={`inline-flex items-center gap-1 text-sm font-medium ${
-                        (product.stock ?? 0) <= 0 ? "text-red-600" :
-                        (product.stock ?? 0) < 10 ? "text-warning" : "text-gray-700"
-                      }`}>
-                        <span className={`status-dot ${
-                          (product.stock ?? 0) <= 0 ? "bg-red-500" :
-                          (product.stock ?? 0) < 10 ? "bg-warning" : "bg-green-500"
-                        }`} />
-                        {product.stock ?? "-"}
-                      </span>
-                    </td>
-                    <td>
-                      {product.category ? (
-                        <span className="badge badge-gray">{product.category}</span>
-                      ) : (
-                        <span className="text-sm text-gray-300">—</span>
-                      )}
-                    </td>
-                    <td>
-                      <span className={`badge ${product.is_active ? "badge-green" : "badge-red"}`}>
-                        {product.is_active ? "نشط" : "غير نشط"}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => setViewProduct(product)} className="btn-ghost p-1.5 text-gray-400 hover:text-accent" title="عرض">
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <Link href={`/products/${product.id}/edit`} className="btn-ghost p-1.5 text-gray-400 hover:text-blue-600" title="تعديل">
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                        <button onClick={() => setDeleteConfirm(product.id)} className="btn-ghost p-1.5 text-gray-400 hover:text-red-600" title="حذف">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="table-base">
+                <thead>
+                  <tr>
+                    <th>المنتج</th>
+                    <th>السعر</th>
+                    <th>المخزون</th>
+                    <th>التصنيف</th>
+                    <th>الحالة</th>
+                    <th className="text-left">الإجراءات</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {filtered.map((product) => (
+                    <tr key={product.id}>
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent/10 text-sm font-bold text-accent">
+                            {product.image ? (
+                              <img src={product.image} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              product.name.charAt(0)
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-gray-900">{product.name}</p>
+                            {product.badge && (
+                              <span className="mt-0.5 inline-block rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">
+                                {product.badge}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td><span className="font-semibold text-gray-900">{formatPrice(product.price)}</span></td>
+                      <td>
+                        <span className={`inline-flex items-center gap-1 text-sm font-medium ${
+                          (product.stock ?? 0) <= 0 ? "text-red-600" :
+                          (product.stock ?? 0) < 10 ? "text-warning" : "text-gray-700"
+                        }`}>
+                          <span className={`status-dot ${
+                            (product.stock ?? 0) <= 0 ? "bg-red-500" :
+                            (product.stock ?? 0) < 10 ? "bg-warning" : "bg-green-500"
+                          }`} />
+                          {product.stock ?? "-"}
+                        </span>
+                      </td>
+                      <td>
+                        {product.category ? (
+                          <span className="badge badge-gray">{product.category}</span>
+                        ) : (
+                          <span className="text-sm text-gray-300">—</span>
+                        )}
+                      </td>
+                      <td>
+                        <span className={`badge ${product.is_active ? "badge-green" : "badge-red"}`}>
+                          {product.is_active ? "نشط" : "غير نشط"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="flex items-center justify-end gap-1">
+                          <button onClick={() => setViewProduct(product)} className="btn-ghost p-1.5 text-gray-400 hover:text-accent" title="عرض">
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          <Link href={`/products/${product.id}/edit`} className="btn-ghost p-1.5 text-gray-400 hover:text-blue-600" title="تعديل">
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                          <button onClick={() => setDeleteConfirm(product.id)} className="btn-ghost p-1.5 text-gray-400 hover:text-red-600" title="حذف">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="block md:hidden space-y-3 p-4">
+              {filtered.map((product) => (
+                <div key={product.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-accent/10 to-accent/5 text-lg font-bold text-accent">
+                        {product.image ? (
+                          <img src={product.image} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          product.name.charAt(0)
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-gray-900 truncate">{product.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {product.badge && (
+                            <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">{product.badge}</span>
+                          )}
+                          <span className={`badge text-[10px] ${product.is_active ? "badge-green" : "badge-red"}`}>
+                            {product.is_active ? "نشط" : "غير نشط"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
+                    <div className="rounded-xl bg-gradient-to-br from-accent/5 to-accent/10 p-3 text-center">
+                      <span className="text-[10px] font-medium text-gray-500 block">السعر</span>
+                      <p className="font-bold text-accent text-sm mt-0.5">{formatPrice(product.price)}</p>
+                    </div>
+                    <div className="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-3 text-center">
+                      <span className="text-[10px] font-medium text-gray-500 block">المخزون</span>
+                      <p className={`font-bold text-sm mt-0.5 ${(product.stock ?? 0) <= 0 ? "text-red-600" : (product.stock ?? 0) < 10 ? "text-warning" : "text-gray-900"}`}>
+                        {product.stock ?? "-"}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-3 text-center">
+                      <span className="text-[10px] font-medium text-gray-500 block">التصنيف</span>
+                      <p className="font-medium text-gray-900 text-sm mt-0.5 truncate">{product.category || "—"}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-end gap-2 pt-3 border-t border-gray-50">
+                    <button onClick={() => setViewProduct(product)} className="flex items-center gap-1.5 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-accent/5 hover:text-accent">
+                      <Eye className="h-3.5 w-3.5" />
+                      عرض
+                    </button>
+                    <Link href={`/products/${product.id}/edit`} className="flex items-center gap-1.5 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                      <Pencil className="h-3.5 w-3.5" />
+                      تعديل
+                    </Link>
+                    <button onClick={() => setDeleteConfirm(product.id)} className="flex items-center gap-1.5 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600">
+                      <Trash2 className="h-3.5 w-3.5" />
+                      حذف
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {/* Pagination */}

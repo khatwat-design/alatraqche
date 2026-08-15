@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import { timeAgo, formatPrice } from "@/lib/utils";
+import { exportToExcel, exportToCSV, exportToJSON } from "@/lib/export";
 import toast from "react-hot-toast";
 
 interface Customer {
@@ -43,6 +44,7 @@ export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const fetchCustomers = useCallback(async (p: number, q: string) => {
@@ -74,30 +76,33 @@ export default function CustomersPage() {
     }, 400);
   };
 
-  const handleExport = async (format: "csv" | "json" | "xlsx" | "ods") => {
-    setExporting(true);
-    try {
-      const params = new URLSearchParams({ format });
-      if (search) params.set("search", search);
-      const token = localStorage.getItem("alatraqchy-token");
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/admin/customers/export?${params}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      if (!res.ok) throw new Error("فشل التصدير");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `customers-${new Date().toISOString().slice(0, 10)}.${format}`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success(`تم تصدير العملاء بصيغة ${format.toUpperCase()}`);
-    } catch {
-      toast.error("فشل تصدير العملاء");
-    } finally {
-      setExporting(false);
+  const handleExport = (format: "csv" | "json" | "xlsx") => {
+    const date = new Date().toISOString().slice(0, 10);
+    const baseName = `customers-${date}`;
+
+    const exportData = customers.map((c) => ({
+      "الاسم": c.name,
+      "البريد الإلكتروني": c.email || "",
+      "الهاتف": c.phone || "",
+      "عدد الطلبات": c.orders_count || 0,
+      "إجمالي المشتريات": c.total_spent || 0,
+      "ملاحظات": c.notes || "",
+      "تاريخ التسجيل": new Date(c.created_at).toLocaleDateString("ar-IQ"),
+    }));
+
+    if (exportData.length === 0) {
+      toast.error("لا يوجد عملاء للتصدير");
+      return;
     }
+
+    if (format === "xlsx") {
+      exportToExcel(exportData, baseName, "العملاء");
+    } else if (format === "csv") {
+      exportToCSV(exportData, baseName, Object.keys(exportData[0]));
+    } else {
+      exportToJSON(exportData, baseName);
+    }
+    toast.success(`تم تصدير ${exportData.length} عميل بصيغة ${format.toUpperCase()}`);
   };
 
   const totalSpent = customers.reduce((s, c) => s + (c.total_spent || 0), 0);
@@ -113,29 +118,35 @@ export default function CustomersPage() {
         </div>
         <div className="flex items-center gap-3">
           {/* Export */}
-          <div className="relative group">
+          <div className="relative">
             <button
               disabled={exporting}
+              onClick={() => setExportOpen(!exportOpen)}
               className="btn-secondary text-sm"
             >
               <Download className="h-4 w-4" />
               {exporting ? "جارٍ التصدير..." : "تصدير"}
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className={`h-3 w-3 transition-transform ${exportOpen ? "rotate-180" : ""}`} />
             </button>
-            <div className="absolute left-0 top-full z-20 mt-1 hidden w-40 animate-fade-in overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl group-hover:block">
-              <button onClick={() => handleExport("csv")} className="block w-full px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-gray-50">
-                CSV
-              </button>
-              <button onClick={() => handleExport("json")} className="block w-full px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-gray-50">
-                JSON
-              </button>
-              <button onClick={() => handleExport("xlsx")} className="block w-full px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-gray-50">
-                Excel (XLSX)
-              </button>
-              <button onClick={() => handleExport("ods")} className="block w-full px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-gray-50">
-                OpenDocument (ODS)
-              </button>
-            </div>
+            {exportOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setExportOpen(false)} />
+                <div className="absolute left-0 top-full z-20 mt-1 w-40 animate-scale-in overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
+                  <button onClick={() => { handleExport("xlsx"); setExportOpen(false); }} className="flex w-full items-center gap-2 px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-accent/5 hover:text-accent">
+                    <span className="inline-block rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-bold text-green-700">XLSX</span>
+                    Excel
+                  </button>
+                  <button onClick={() => { handleExport("csv"); setExportOpen(false); }} className="flex w-full items-center gap-2 px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-gray-50">
+                    <span className="inline-block rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">CSV</span>
+                    CSV
+                  </button>
+                  <button onClick={() => { handleExport("json"); setExportOpen(false); }} className="flex w-full items-center gap-2 px-4 py-2.5 text-right text-sm text-gray-700 hover:bg-gray-50">
+                    <span className="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-600">JSON</span>
+                    JSON
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -222,7 +233,8 @@ export default function CustomersPage() {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="table-base">
                 <thead>
                   <tr>
@@ -299,6 +311,52 @@ export default function CustomersPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="block md:hidden space-y-3">
+              {customers.map((customer) => (
+                <div key={customer.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full gold-gradient text-sm font-bold text-white shadow-sm">
+                      {customer.name?.charAt(0)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-gray-900">{customer.name}</p>
+                      {customer.notes && <p className="text-xs text-gray-400 mt-0.5">{customer.notes}</p>}
+                      {(customer.email || customer.phone) && (
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          {customer.email && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs text-gray-600" dir="ltr">
+                              <Mail className="h-3 w-3 shrink-0 text-gray-400" />
+                              {customer.email}
+                            </span>
+                          )}
+                          {customer.phone && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs text-gray-600" dir="ltr">
+                              <Phone className="h-3 w-3 shrink-0 text-gray-400" />
+                              {customer.phone}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50 text-sm">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-accent-subtle px-2.5 py-0.5 text-xs font-semibold text-accent-hover">
+                        <ShoppingBag className="h-3 w-3" />
+                        {customer.orders_count || 0}
+                      </span>
+                      <span className="font-semibold text-gray-900">{formatPrice(customer.total_spent || 0)}</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                      <Calendar className="h-3 w-3" />
+                      {timeAgo(customer.created_at)}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Pagination */}

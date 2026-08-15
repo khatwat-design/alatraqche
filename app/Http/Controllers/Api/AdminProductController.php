@@ -138,6 +138,29 @@ class AdminProductController extends Controller
 
         $product->save();
 
+        $images = [];
+        if ($request->hasFile('image')) {
+            $images[] = $request->file('image');
+        }
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $images[] = $file;
+            }
+        }
+
+        if (! empty($images)) {
+            $primaryIdx = (int) ($request->input('primary_image', 0));
+            foreach ($images as $i => $file) {
+                $media = $product->addMedia($file)
+                    ->withCustomProperties(['is_primary' => $i === $primaryIdx])
+                    ->toMediaCollection('default');
+                if ($i === $primaryIdx || ($i === 0 && ! $request->has('primary_image'))) {
+                    $product->image = $media->getUrl();
+                }
+            }
+            $product->save();
+        }
+
         return response()->json([
             'ok' => true,
             'message' => 'تم تحديث المنتج بنجاح',

@@ -25,7 +25,6 @@ const mainNavItems = [
 
 const moreItems = [
   { href: "/categories", label: "التصنيفات", icon: Tags },
-  { href: "/banners", label: "البنرات", icon: ImageIcon },
   { href: "/analytics", label: "التحليلات", icon: BarChart3 },
   { href: "/settings", label: "الإعدادات", icon: Settings },
 ];

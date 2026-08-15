@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\AssetHelper;
 use App\Http\Controllers\Controller;
-use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\StoreSetting;
@@ -97,9 +96,24 @@ class StorefrontController extends Controller
             $query->where('category_id', $categoryId);
         }
 
-        $rows = $query->orderBy('sort_order')
-            ->orderBy('name')
-            ->paginate($perPage);
+        $sort = $request->query('sort', 'default');
+        switch ($sort) {
+            case 'price_asc':
+                $query->orderBy('price');
+                break;
+            case 'price_desc':
+                $query->orderByDesc('price');
+                break;
+            case 'name':
+                $query->orderBy('name');
+                break;
+            default:
+                $query->orderBy('sort_order');
+                $query->orderBy('name');
+                break;
+        }
+
+        $rows = $query->paginate($perPage);
 
         return response()->json([
             'products' => collect($rows->items())->map(fn (Product $p) => $p->toStorefrontArray())->values()->all(),
@@ -110,23 +124,5 @@ class StorefrontController extends Controller
                 'total' => $rows->total(),
             ],
         ]);
-    }
-
-    public function banners(): JsonResponse
-    {
-        $rows = Banner::query()
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get()
-            ->filter(fn (Banner $b) => $b->image_public_url !== '');
-
-        return response()->json(
-            $rows->values()->map(fn (Banner $b) => [
-                'id' => $b->id,
-                'title' => $b->title,
-                'image' => $b->image_public_url,
-                'linkUrl' => $b->link_url,
-            ])->values()->all()
-        );
     }
 }

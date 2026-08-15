@@ -1,21 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: "/store",
+  output: "standalone",
+
   images: {
     remotePatterns: [
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "8000",
-        pathname: "/**",
-      },
-      {
         protocol: "https",
         hostname: "dashbord.alatraqchy.com",
-        pathname: "/**",
+        port: "",
+        pathname: "/storage/**",
       },
     ],
+    qualities: [75, 90, 95, 100],
   },
 };
 
