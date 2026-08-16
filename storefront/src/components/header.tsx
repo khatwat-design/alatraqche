@@ -136,10 +136,7 @@ export default function Header() {
               الرئيسية
             </Link>
             <Link href="/products" className="hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>
-              المتجر
-            </Link>
-            <Link href="/products?category=mattresses" className="hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>
-              المراتب
+              المنتجات
             </Link>
             <Link href="/cart" className="hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>
               السلة
