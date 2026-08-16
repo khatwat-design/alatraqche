@@ -1,12 +1,37 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { useProducts } from "@/lib/use-products";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import StoreHero from "@/components/store-hero";
+import type { Product } from "@/lib/products";
 
 export default function Home() {
   const { products, categories, loading, error, refresh } = useProducts();
+
+  const byCategory = useMemo(() => {
+    const map = new Map<string, Product[]>();
+    for (const p of products) {
+      const list = map.get(p.categoryId);
+      if (list) list.push(p);
+      else map.set(p.categoryId, [p]);
+    }
+    return map;
+  }, [products]);
+
+  const featuredCats = useMemo(
+    () =>
+      categories
+        .filter((c) => (byCategory.get(c.id)?.length ?? 0) > 0)
+        .slice(0, 5),
+    [categories, byCategory],
+  );
+
+  const restCats = useMemo(
+    () => categories.filter((c) => !featuredCats.some((f) => f.id === c.id)),
+    [categories, featuredCats],
+  );
 
   return (
     <div className="space-y-14 md:space-y-18">
@@ -27,27 +52,94 @@ export default function Home() {
         </div>
       ) : null}
 
-      {categories.length > 0 && (
-        <section className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-stone-900 md:text-3xl">الأقسام</h2>
-              <p className="mt-1 text-sm text-[var(--color-muted)]">تصفح حسب التصنيف</p>
-            </div>
-            <Link
-              href="/products"
-              className="text-sm font-semibold text-[var(--color-primary)] hover:underline"
-            >
-              عرض الكل ←
-            </Link>
-          </div>
+      {loading ? (
+        <>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <section key={i} className="mx-auto max-w-6xl">
+              <div className="mb-6 px-6">
+                <div className="h-7 w-44 animate-pulse rounded-lg bg-stone-200" />
+                <div className="mt-2 h-4 w-28 animate-pulse rounded bg-stone-100" />
+              </div>
+              <div className="flex gap-4 overflow-x-auto px-6">
+                {Array.from({ length: 4 }).map((_, j) => (
+                  <div
+                    key={j}
+                    className="w-[68vw] min-w-[240px] snap-start sm:w-[280px]"
+                  >
+                    <ProductCardSkeleton />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </>
+      ) : (
+        <>
+          {featuredCats.map((cat) => {
+            const catProducts = byCategory.get(cat.id) ?? [];
+            return (
+              <section key={cat.id} className="mx-auto max-w-6xl">
+                <div className="mb-6 flex items-end justify-between gap-4 px-6">
+                  <div className="flex items-center gap-3">
+                    {cat.image ? (
+                      <img
+                        src={cat.image}
+                        alt={cat.name}
+                        className="h-11 w-11 rounded-2xl object-cover md:h-14 md:w-14"
+                      />
+                    ) : null}
+                    <div>
+                      <h2 className="text-2xl font-bold text-stone-900 md:text-3xl">
+                        {cat.name}
+                      </h2>
+                      <p className="mt-1 text-sm text-[var(--color-muted)]">
+                        {cat.description || `${catProducts.length} منتج`}
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/products?category=${cat.id}`}
+                    className="shrink-0 text-sm font-semibold text-[var(--color-primary)] hover:underline"
+                  >
+                    عرض الكل ←
+                  </Link>
+                </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {loading
-              ? Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="h-48 animate-pulse rounded-2xl bg-stone-100" />
-                ))
-              : categories.slice(0, 8).map((cat) => (
+                <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {catProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="w-[68vw] min-w-[240px] snap-start sm:w-[280px] lg:w-[280px]"
+                    >
+                      <ProductCard product={product} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+
+          {restCats.length > 0 && (
+            <section className="mx-auto max-w-6xl px-6">
+              <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-stone-900 md:text-3xl">
+                    الأقسام
+                  </h2>
+                  <p className="mt-1 text-sm text-[var(--color-muted)]">
+                    باقي التصنيفات
+                  </p>
+                </div>
+                <Link
+                  href="/products"
+                  className="text-sm font-semibold text-[var(--color-primary)] hover:underline"
+                >
+                  عرض الكل ←
+                </Link>
+              </div>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {restCats.map((cat) => (
                   <Link
                     key={cat.id}
                     href={`/products?category=${cat.id}`}
@@ -65,48 +157,26 @@ export default function Home() {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent transition duration-300 group-hover:from-black/80 group-hover:via-black/40" />
                     <div className="relative z-10 p-5 md:p-6">
-                      <h3 className="text-lg font-bold text-white md:text-xl">{cat.name}</h3>
+                      <h3 className="text-lg font-bold text-white md:text-xl">
+                        {cat.name}
+                      </h3>
                       <span className="mt-3 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm transition group-hover:bg-[var(--color-primary)]">
                         تصفّح ←
                       </span>
                     </div>
                   </Link>
                 ))}
-          </div>
-        </section>
-      )}
-
-      {products.length > 0 && (
-        <section className="bg-stone-50/80 py-14">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-stone-900 md:text-3xl">منتجات مميزة</h2>
-                <p className="mt-1 text-sm text-[var(--color-muted)]">اختر من بين أفضل منتجاتنا</p>
               </div>
-              <Link
-                href="/products"
-                className="text-sm font-semibold text-[var(--color-primary)] hover:underline"
-              >
-                عرض الكل ←
-              </Link>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {loading
-                ? Array.from({ length: 8 }).map((_, i) => (
-                    <ProductCardSkeleton key={i} />
-                  ))
-                : products.slice(0, 8).map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-            </div>
-          </div>
-        </section>
+            </section>
+          )}
+        </>
       )}
 
       <section className="mx-auto max-w-6xl px-6">
         <div className="rounded-3xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-600)] p-8 text-center text-white shadow-xl md:p-12">
-          <h2 className="text-2xl font-bold md:text-3xl">الأطرقجي للسجاد والأثاث</h2>
+          <h2 className="text-2xl font-bold md:text-3xl">
+            الأطرقجي للسجاد والأثاث
+          </h2>
           <p className="mt-3 text-sm text-white/80 md:text-base">
             نوفر لك أفضل المنتجات المنزلية بجودة عالية وأسعار منافسة
           </p>
