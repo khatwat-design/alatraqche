@@ -15,6 +15,12 @@ interface StoreSettings {
   delivery_fee?: number;
   free_delivery_threshold?: number;
   currency?: string;
+  meta_pixel_id?: string;
+  tiktok_pixel_id?: string;
+  google_analytics_id?: string;
+  snapchat_pixel_id?: string;
+  twitter_pixel_id?: string;
+  custom_head_snippet?: string;
 }
 
 interface NotifSettings {
@@ -306,6 +312,41 @@ export default function UnifiedSettingsPage() {
                         <input type="number" value={store.free_delivery_threshold || 0} onChange={(e) => setStore({ ...store, free_delivery_threshold: Number(e.target.value) })} className="input-field pl-10" />
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <div className="card">
+                  <div className="mb-1 flex items-center gap-2">
+                    <Settings className="h-5 w-5 text-accent" />
+                    <h2 className="text-base font-semibold text-gray-900">التراكنق والبكسلات</h2>
+                  </div>
+                  <p className="mb-5 text-xs text-gray-500">معرّفات بكسلات الإعلانات. تُحمَّل تلقائياً في المتجر وتُتتبَّع الأحداث (مشاهدة منتج، إضافة للسلة، بدء الدفع، الشراء، البحث...). اترك الحقل فارغاً لتعطيل البكسل.</p>
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-gray-700">Meta Pixel ID</label>
+                      <input type="text" dir="ltr" value={store.meta_pixel_id || ""} onChange={(e) => setStore({ ...store, meta_pixel_id: e.target.value })} className="input-field" placeholder="مثال: 1481471186998919" />
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-gray-700">TikTok Pixel ID</label>
+                      <input type="text" dir="ltr" value={store.tiktok_pixel_id || ""} onChange={(e) => setStore({ ...store, tiktok_pixel_id: e.target.value })} className="input-field" placeholder="مثال: D9RLHDRC77U6RO6J4000" />
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-gray-700">Google Analytics ID</label>
+                      <input type="text" dir="ltr" value={store.google_analytics_id || ""} onChange={(e) => setStore({ ...store, google_analytics_id: e.target.value })} className="input-field" placeholder="مثال: G-XXXXXXX" />
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-gray-700">Snapchat Pixel ID</label>
+                      <input type="text" dir="ltr" value={store.snapchat_pixel_id || ""} onChange={(e) => setStore({ ...store, snapchat_pixel_id: e.target.value })} className="input-field" placeholder="مثال: 12abc345-6789-...." />
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-gray-700">X / Twitter Pixel ID</label>
+                      <input type="text" dir="ltr" value={store.twitter_pixel_id || ""} onChange={(e) => setStore({ ...store, twitter_pixel_id: e.target.value })} className="input-field" placeholder="مثال: abc12345" />
+                    </div>
+                  </div>
+                  <div className="mt-5">
+                    <label className="mb-1.5 block text-sm font-medium text-gray-700">كود إضافي في رأس المتجر (Custom Head)</label>
+                    <textarea dir="ltr" value={store.custom_head_snippet || ""} onChange={(e) => setStore({ ...store, custom_head_snippet: e.target.value })} className="input-field min-h-[100px] resize-y font-mono text-xs" placeholder="<script>...</script>" />
+                    <p className="mt-1 text-xs text-gray-400">أي كود HTML/سكربت تُضيفه يُحقن في رأس المتجر (مثلاً: كود تثبيت البكسل الرسمي الكامل).</p>
                   </div>
                 </div>
               </>

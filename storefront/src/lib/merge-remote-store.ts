@@ -30,6 +30,7 @@ export type MergedStoreSettings = {
   googleAnalyticsId: string;
   metaPixelId: string;
   tiktokPixelId: string;
+  customHeadSnippet: string;
 };
 
 function darkenHex(hex: string, amount = 0.12): string {
@@ -112,6 +113,7 @@ export function mergeRemoteStore(remote: RemoteStorePayload | null): MergedStore
       remote?.tiktokPixelId?.trim() ||
       process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID?.trim() ||
       "",
+    customHeadSnippet: remote?.customHeadSnippet?.trim() || "",
   };
 }
 

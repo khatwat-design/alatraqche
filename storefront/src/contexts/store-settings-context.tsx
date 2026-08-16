@@ -104,6 +104,50 @@ function PixelPageViewTracker() {
   return null;
 }
 
+type ParsedSnippet = {
+  scripts: { key: string; src?: string; body?: string }[];
+  html: string;
+};
+
+function parseHeadSnippet(raw: string): ParsedSnippet {
+  const scripts: ParsedSnippet["scripts"] = [];
+  const html = raw.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>|<script\b([^>]*)\/>/g, (_m, attrs1, body, attrs2) => {
+    const attrs = attrs1 || attrs2 || "";
+    const src = attrs.match(/\bsrc\s*=\s*["']([^"']+)["']/);
+    scripts.push({
+      key: `cs-${scripts.length}`,
+      src: src ? src[1] : undefined,
+      body: body && body.trim() ? body : undefined,
+    });
+    return "";
+  });
+  return { scripts, html: html.trim() };
+}
+
+/** يحقن `custom_head_snippet` المُعد من اللوحة (سكربتات عبر next/script + بقية HTML). */
+function CustomHeadSnippetLoader() {
+  const { store } = useStoreSettings();
+  const snippet = store.customHeadSnippet;
+  if (!snippet) return null;
+
+  const parsed = parseHeadSnippet(snippet);
+
+  return (
+    <>
+      {parsed.scripts.map((s) =>
+        s.src ? (
+          <Script key={s.key} src={s.src} strategy="afterInteractive" />
+        ) : s.body ? (
+          <Script key={s.key} id={s.key} strategy="afterInteractive">
+            {s.body}
+          </Script>
+        ) : null,
+      )}
+      {parsed.html ? <div dangerouslySetInnerHTML={{ __html: parsed.html }} /> : null}
+    </>
+  );
+}
+
 export function StorePixelsScripts() {
   const { store } = useStoreSettings();
   const ga = store.googleAnalyticsId?.trim();
@@ -113,6 +157,7 @@ export function StorePixelsScripts() {
   return (
     <>
       <PixelPageViewTracker />
+      <CustomHeadSnippetLoader />
       {ga ? (
         <>
           <Script

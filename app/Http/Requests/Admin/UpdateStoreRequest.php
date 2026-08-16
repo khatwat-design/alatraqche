@@ -27,6 +27,12 @@ class UpdateStoreRequest extends FormRequest
             'instagram_url' => 'nullable|string|max:500',
             'facebook_url' => 'nullable|string|max:500',
             'tiktok_url' => 'nullable|string|max:500',
+            'meta_pixel_id' => 'nullable|string|max:255',
+            'tiktok_pixel_id' => 'nullable|string|max:255',
+            'google_analytics_id' => 'nullable|string|max:255',
+            'snapchat_pixel_id' => 'nullable|string|max:255',
+            'twitter_pixel_id' => 'nullable|string|max:255',
+            'custom_head_snippet' => 'nullable|string|max:10000',
         ];
     }
 }

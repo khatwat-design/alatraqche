@@ -47,6 +47,12 @@ class AdminController extends Controller
             'facebook_url' => $s->facebook_url,
             'tiktok_url' => $s->tiktok_url,
             'logo_url' => $s->logo_url,
+            'meta_pixel_id' => $s->meta_pixel_id,
+            'tiktok_pixel_id' => $s->tiktok_pixel_id,
+            'google_analytics_id' => $s->google_analytics_id,
+            'snapchat_pixel_id' => $s->snapchat_pixel_id,
+            'twitter_pixel_id' => $s->twitter_pixel_id,
+            'custom_head_snippet' => $s->custom_head_snippet,
         ]);
     }
 
@@ -68,10 +74,16 @@ class AdminController extends Controller
             'instagram_url' => 'instagram_url',
             'facebook_url' => 'facebook_url',
             'tiktok_url' => 'tiktok_url',
+            'meta_pixel_id' => 'meta_pixel_id',
+            'tiktok_pixel_id' => 'tiktok_pixel_id',
+            'google_analytics_id' => 'google_analytics_id',
+            'snapchat_pixel_id' => 'snapchat_pixel_id',
+            'twitter_pixel_id' => 'twitter_pixel_id',
+            'custom_head_snippet' => 'custom_head_snippet',
         ];
 
         foreach ($mapped as $inputKey => $modelKey) {
-            if (isset($data[$inputKey])) {
+            if (array_key_exists($inputKey, $data)) {
                 $setting->$modelKey = $data[$inputKey];
             }
         }
