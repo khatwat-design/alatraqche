@@ -165,16 +165,26 @@ export default function EditProductPage() {
     }
     setSaving(true);
     try {
-      await api.put(`/admin/products/${productId}`, {
-        name: form.name,
-        description: form.description || null,
-        price: Number(form.price),
-        stock: form.stock ? Number(form.stock) : null,
-        category_id: form.category_id || null,
-        badge: form.badge || null,
-        is_active: form.is_active,
-        sort_order: form.sort_order ? Number(form.sort_order) : 0,
+      const fd = new FormData();
+      fd.append("name", form.name);
+      if (form.description) fd.append("description", form.description);
+      fd.append("price", String(Number(form.price)));
+      if (form.stock) fd.append("stock", String(Number(form.stock)));
+      if (form.category_id) fd.append("category_id", form.category_id);
+      if (form.badge) fd.append("badge", form.badge);
+      fd.append("is_active", form.is_active ? "1" : "0");
+      fd.append("sort_order", String(Number(form.sort_order)));
+
+      const primaryIdx = newImages.findIndex((img) => img.isPrimary);
+      if (primaryIdx >= 0) {
+        fd.append("primary_image", String(primaryIdx));
+      }
+
+      newImages.forEach((img, i) => {
+        fd.append(`images[${i}]`, img.file);
       });
+
+      await api.put(`/admin/products/${productId}`, fd);
       toast.success("تم تحديث المنتج بنجاح");
       router.push("/products");
     } catch (err: any) {

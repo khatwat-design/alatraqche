@@ -174,9 +174,7 @@ export default function ProductsPage() {
         fd.append(`images[${i}]`, img.file);
       });
 
-      await api.post("/admin/products", fd, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await api.post("/admin/products", fd);
       toast.success("تم إضافة المنتج بنجاح");
       setShowCreate(false);
       resetForm();

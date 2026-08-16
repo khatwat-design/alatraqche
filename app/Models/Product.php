@@ -92,7 +92,10 @@ class Product extends Model implements HasMedia
 
     public function getImagePublicUrlAttribute(): string
     {
-        $media = $this->getFirstMedia('default');
+        $media = $this->getMedia('default')
+            ->first(fn (Media $m) => ($m->getCustomProperty('is_primary') ?? false) === true)
+            ?? $this->getFirstMedia('default');
+
         if ($media) {
             $conversions = $media->getGeneratedConversions();
             if ($conversions['large'] ?? false) {
