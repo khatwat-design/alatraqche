@@ -22,8 +22,13 @@ export default function Home() {
 
   const featuredCats = useMemo(
     () =>
-      categories
+      [...categories]
         .filter((c) => (byCategory.get(c.id)?.length ?? 0) > 0)
+        .sort(
+          (a, b) =>
+            (byCategory.get(b.id)?.length ?? 0) -
+            (byCategory.get(a.id)?.length ?? 0),
+        )
         .slice(0, 5),
     [categories, byCategory],
   );

@@ -11,14 +11,25 @@ export async function fetchStoreCatalogFromApi(): Promise<{
   if (!root) return null;
 
   try {
-    const [prodRes, catRes] = await Promise.all([
-      fetch(`${root}/products`),
-      fetch(`${root}/categories`),
-    ]);
-    if (!prodRes.ok || !catRes.ok) return null;
-    const prodJson = (await prodRes.json()) as { products?: Product[] };
+    const catRes = await fetch(`${root}/categories`);
+    if (!catRes.ok) return null;
     const categories = (await catRes.json()) as Category[];
-    const products = Array.isArray(prodJson.products) ? prodJson.products : [];
+
+    let products: Product[] = [];
+    let page = 1;
+    let lastPage = 1;
+    do {
+      const res = await fetch(`${root}/products?per_page=100&page=${page}`);
+      if (!res.ok) return null;
+      const json = (await res.json()) as {
+        products?: Product[];
+        meta?: { current_page: number; last_page: number };
+      };
+      products = products.concat(Array.isArray(json.products) ? json.products : []);
+      lastPage = json.meta?.last_page ?? 1;
+      page += 1;
+    } while (page <= lastPage);
+
     return { products, categories: Array.isArray(categories) ? categories : [] };
   } catch {
     return null;
