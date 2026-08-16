@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import Script from "next/script";
 import {
   createContext,
@@ -7,6 +8,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type { MergedStoreSettings } from "@/lib/merge-remote-store";
@@ -77,6 +79,31 @@ export function useStoreSettings(): Ctx {
 }
 
 /** بكسلات التحليلات — تُحمَّل بعد جلب `/api/store` (تتجاوز أو تُكمّل NEXT_PUBLIC_*). */
+/**
+ * يطلق PageView على Meta Pixel و TikTok Pixel عند كل تنقّل داخل المتجر (SPA)،
+ * بعد أول تحميل (الذي يطلقه سكربت التحميل نفسه). لا يُطلق شيئاً عند البداية.
+ */
+function PixelPageViewTracker() {
+  const pathname = usePathname();
+  const prev = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (prev.current === null) {
+      prev.current = pathname;
+      return;
+    }
+    if (prev.current === pathname) return;
+    prev.current = pathname;
+    if (typeof window === "undefined") return;
+    const fbq = (window as { fbq?: (...args: unknown[]) => void }).fbq;
+    if (typeof fbq === "function") fbq("track", "PageView");
+    const ttq = (window as { ttq?: { page: () => void } }).ttq;
+    if (ttq && typeof ttq.page === "function") ttq.page();
+  }, [pathname]);
+
+  return null;
+}
+
 export function StorePixelsScripts() {
   const { store } = useStoreSettings();
   const ga = store.googleAnalyticsId?.trim();
@@ -85,6 +112,7 @@ export function StorePixelsScripts() {
 
   return (
     <>
+      <PixelPageViewTracker />
       {ga ? (
         <>
           <Script

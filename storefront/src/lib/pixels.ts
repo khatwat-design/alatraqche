@@ -50,3 +50,18 @@ export const trackPurchase = (payload: PixelPayload) => {
   meta.trackPurchase(payload);
   tiktok.trackPurchase(payload);
 };
+
+export const trackSearch = (query: string) => {
+  meta.trackSearch(query);
+  tiktok.trackSearch(query);
+};
+
+export const trackViewCategory = (categoryId: string, categoryName?: string) => {
+  meta.trackViewCategory(categoryId, categoryName);
+  tiktok.trackViewCategory(categoryId, categoryName);
+};
+
+export const trackContact = (channel: string) => {
+  meta.trackContact(channel);
+  tiktok.trackContact(channel);
+};

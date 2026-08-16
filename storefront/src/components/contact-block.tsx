@@ -1,6 +1,7 @@
 "use client";
 
 import { useStoreSettings } from "@/contexts/store-settings-context";
+import { trackContact } from "@/lib/pixels";
 
 type Props = {
   variant?: "hero" | "footer";
@@ -54,6 +55,7 @@ export default function ContactBlock({ variant = "footer" }: Props) {
             rel="noopener noreferrer"
             className={pillBase}
             aria-label={`مراسلة واتساب ${display}`}
+            onClick={() => trackContact("WhatsApp")}
           >
             <WhatsAppIcon className="h-4 w-4 shrink-0 opacity-90" />
             {display}

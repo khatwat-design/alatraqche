@@ -8,7 +8,7 @@ import type { Product, SortKey } from "@/lib/products";
 import { filterProductsByQuery, sortProducts } from "@/lib/products";
 import { useCart } from "@/components/cart-context";
 import { useProducts } from "@/lib/use-products";
-import { trackAddToCart } from "@/lib/pixels";
+import { trackAddToCart, trackSearch, trackViewCategory } from "@/lib/pixels";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
@@ -73,6 +73,29 @@ export default function CatalogClient() {
       setActiveCategory("all");
     }
   }, [urlCategory, categories]);
+
+  const prevCategory = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (prevCategory.current === null) {
+      prevCategory.current = activeCategory;
+      return;
+    }
+    if (prevCategory.current === activeCategory) return;
+    prevCategory.current = activeCategory;
+    if (activeCategory === "all") return;
+    const cat = categories.find((c) => c.id === activeCategory);
+    trackViewCategory(activeCategory, cat?.name);
+  }, [activeCategory, categories]);
+
+  const prevSearch = useRef("");
+
+  useEffect(() => {
+    const q = debouncedSearch.trim();
+    if (!q || prevSearch.current === q) return;
+    prevSearch.current = q;
+    trackSearch(q);
+  }, [debouncedSearch]);
 
   const setCategory = useCallback(
     (id: string) => {

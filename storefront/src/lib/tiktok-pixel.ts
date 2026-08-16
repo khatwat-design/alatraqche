@@ -106,3 +106,26 @@ export const trackAddPaymentInfo = (payload: PixelPayload) => {
     })),
   });
 };
+
+export const trackSearch = (query: string) => {
+  const ttq = getTtq();
+  if (!ttq) return;
+  ttq.track("Search", { query });
+};
+
+export const trackViewCategory = (categoryId: string, categoryName?: string) => {
+  const ttq = getTtq();
+  if (!ttq) return;
+  ttq.track("ViewContent", {
+    content_type: "product_category",
+    content_id: categoryId,
+    content_category: categoryName || categoryId,
+    content_name: categoryName || categoryId,
+  });
+};
+
+export const trackContact = (channel: string) => {
+  const ttq = getTtq();
+  if (!ttq) return;
+  ttq.track("Contact", { content_name: channel });
+};

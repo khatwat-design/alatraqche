@@ -112,3 +112,35 @@ export const trackAddPaymentInfo = (payload: PixelPayload) => {
     contents: normalizeContents(payload.items),
   });
 };
+
+/** بحث في الكتالوج */
+export const trackSearch = (query: string) => {
+  const fbq = getFbq();
+  if (!fbq) {
+    return;
+  }
+  fbq("track", "Search", { search_string: query });
+};
+
+/** مشاهدة تصنيف (فلترة الكتالوج حسب قسم) */
+export const trackViewCategory = (categoryId: string, categoryName?: string) => {
+  const fbq = getFbq();
+  if (!fbq) {
+    return;
+  }
+  fbq("trackCustom", "ViewCategory", {
+    content_type: "product_category",
+    content_category: categoryName || categoryId,
+    content_name: categoryName || categoryId,
+    content_id: categoryId,
+  });
+};
+
+/** تواصل (ضغطة واتساب/اتصال) */
+export const trackContact = (channel: string) => {
+  const fbq = getFbq();
+  if (!fbq) {
+    return;
+  }
+  fbq("track", "Contact", { content_name: channel });
+};
