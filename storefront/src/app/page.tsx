@@ -79,31 +79,35 @@ export default function Home() {
             const catProducts = byCategory.get(cat.id) ?? [];
             return (
               <section key={cat.id} className="mx-auto max-w-6xl">
-                <div className="mb-6 flex items-end justify-between gap-4 px-6">
-                  <div className="flex items-center gap-3">
-                    {cat.image ? (
-                      <img
-                        src={cat.image}
-                        alt={cat.name}
-                        className="h-11 w-11 rounded-2xl object-cover md:h-14 md:w-14"
-                      />
-                    ) : null}
+                <Link
+                  href={`/products?category=${cat.id}`}
+                  className="group relative mb-6 block overflow-hidden rounded-2xl md:rounded-3xl"
+                >
+                  {cat.image ? (
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      className="aspect-[16/6] w-full object-cover transition duration-500 group-hover:scale-105 sm:aspect-[21/6]"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="aspect-[16/6] w-full bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 sm:aspect-[21/6]" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 md:p-7">
                     <div>
-                      <h2 className="text-2xl font-bold text-stone-900 md:text-3xl">
+                      <h2 className="text-2xl font-bold text-white md:text-3xl">
                         {cat.name}
                       </h2>
-                      <p className="mt-1 text-sm text-[var(--color-muted)]">
+                      <p className="mt-1 text-sm text-white/85">
                         {cat.description || `${catProducts.length} منتج`}
                       </p>
                     </div>
+                    <span className="shrink-0 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm transition group-hover:bg-[var(--color-primary)]">
+                      عرض الكل ←
+                    </span>
                   </div>
-                  <Link
-                    href={`/products?category=${cat.id}`}
-                    className="shrink-0 text-sm font-semibold text-[var(--color-primary)] hover:underline"
-                  >
-                    عرض الكل ←
-                  </Link>
-                </div>
+                </Link>
 
                 <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {catProducts.map((product) => (
@@ -138,12 +142,12 @@ export default function Home() {
                 </Link>
               </div>
 
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {restCats.map((cat) => (
                   <Link
                     key={cat.id}
                     href={`/products?category=${cat.id}`}
-                    className="group relative flex min-h-[200px] flex-col justify-end overflow-hidden rounded-2xl bg-gradient-to-br from-stone-100 to-stone-200 md:rounded-3xl"
+                    className="group relative flex min-h-[160px] w-[55vw] min-w-[190px] max-w-[260px] shrink-0 snap-start flex-col justify-end overflow-hidden rounded-2xl bg-gradient-to-br from-stone-100 to-stone-200 md:rounded-3xl"
                   >
                     {cat.image ? (
                       <img
@@ -156,13 +160,10 @@ export default function Home() {
                       <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent transition duration-300 group-hover:from-black/80 group-hover:via-black/40" />
-                    <div className="relative z-10 p-5 md:p-6">
-                      <h3 className="text-lg font-bold text-white md:text-xl">
+                    <div className="relative z-10 p-4 md:p-5">
+                      <h3 className="text-base font-bold text-white md:text-lg">
                         {cat.name}
                       </h3>
-                      <span className="mt-3 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm transition group-hover:bg-[var(--color-primary)]">
-                        تصفّح ←
-                      </span>
                     </div>
                   </Link>
                 ))}
