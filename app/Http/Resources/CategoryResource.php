@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Helpers\AssetHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -13,7 +14,7 @@ class CategoryResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description ?? '',
-            'image' => $this->image ? \Illuminate\Support\Facades\Storage::url($this->image) : null,
+            'image' => AssetHelper::publicUrl($this->image),
             'sort_order' => (int) $this->sort_order,
             'products_count' => $this->whenCounted('products'),
             'created_at' => $this->created_at?->toIso8601String(),
