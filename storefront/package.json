@@ -12,8 +12,8 @@
     "dev:standalone": "NEXT_PUBLIC_STORE_STANDALONE=true next dev",
     "build": "next build",
     "build:standalone": "NEXT_PUBLIC_STORE_STANDALONE=true next build",
-    "start": "STORE_API_BASE_URL=http://127.0.0.1:8080/api/v1 node server.js",
-    "start:standalone": "STORE_API_BASE_URL=http://127.0.0.1:8080/api/v1 NEXT_PUBLIC_STORE_STANDALONE=true node server.js",
+    "start": "node server.js",
+    "start:standalone": "NEXT_PUBLIC_STORE_STANDALONE=true node server.js",
     "deploy:hostinger": "node scripts/deploy-hostinger.js",
     "build:hostinger": "node scripts/hostinger-build.js",
     "lint": "eslint"
