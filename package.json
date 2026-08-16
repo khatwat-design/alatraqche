@@ -2,7 +2,9 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
+        "build": "npm --prefix storefront install && npm --prefix storefront run build",
+        "build:laravel": "vite build",
+        "start": "npm --prefix storefront start",
         "dev": "vite"
     },
     "devDependencies": {
